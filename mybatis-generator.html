@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyBatis CRUD Generator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --surface3:#2d333b;
+  --border:#30363d; --text:#cdd9e5; --muted:#768390;
+  --primary:#316dca; --primary-h:#388bfd;
+  --green:#57ab5a; --yellow:#e3b341; --orange:#cc7832;
+  --purple:#b392f0; --red:#f47067; --cyan:#80ccff; --teal:#38bdf8;
+  --xml-tag:#f47067; --xml-attr:#6cb6ff; --xml-val:#96d0ff;
+  --xml-cmt:#636e7b; --sql-kw:#f47067; --sql-param:#57ab5a;
+  --radius:8px;
+}
+[data-theme="light"] {
+  --bg:#ffffff; --surface:#f8f9fb; --surface2:#f1f4f7; --surface3:#ffffff;
+  --border:#cdd3da; --text:#1f2328; --muted:#636d79;
+  --primary:#0969da; --primary-h:#0550ae;
+  --green:#1a7f37; --yellow:#9a6700; --orange:#953800;
+  --purple:#6639ba; --red:#cf222e; --cyan:#0969da; --teal:#0284c7;
+  --xml-tag:#cf222e; --xml-attr:#0969da; --xml-val:#0550ae;
+  --xml-cmt:#57606a; --sql-kw:#cf222e; --sql-param:#1a7f37;
+}
+body { font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* HEADER */
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+header h1 { font-size:1.25rem; font-weight:700; }
+.logo { color:var(--red); }
+.sub  { color:var(--muted); font-weight:400; font-size:1.05rem; }
+.hdr-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+/* LAYOUT */
+.layout { display:grid; grid-template-columns:500px 1fr; flex:1; overflow:hidden; }
+
+/* PANEL */
+.left-side { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); }
+.panel { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); background:var(--surface2); }
+.panel-title { padding:9px 14px; font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:space-between; }
+.panel-body { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:22px; }
+.cond-outer { background:var(--surface2); border-top:2px solid var(--border); overflow-y:auto; max-height:260px; flex-shrink:0; }
+.cond-outer-body { padding:12px 14px; display:flex; flex-direction:column; }
+
+/* NAMESPACE BAR */
+.namespace-bar { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 12px; display:flex; align-items:center; gap:8px; }
+.namespace-bar label { font-size:.72rem; font-weight:700; color:var(--muted); white-space:nowrap; text-transform:uppercase; letter-spacing:.05em; }
+.namespace-bar input { background:transparent; border:none; color:var(--text); font-family:inherit; font-size:.85rem; flex:1; outline:none; }
+.namespace-bar input::placeholder { color:var(--muted); }
+
+/* FORM */
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:.82rem; font-weight:700; color:var(--text); }
+input[type=text], textarea, select { background:var(--surface3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:inherit; font-size:.85rem; padding:7px 10px; width:100%; transition:border-color .15s; }
+input[type=text]:focus, textarea:focus, select:focus { outline:none; border-color:var(--primary-h); box-shadow:0 0 0 2px rgba(56,139,253,.15); }
+input::placeholder, textarea::placeholder { color:var(--muted); }
+textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-size:.82rem; line-height:1.6; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.row3 { display:grid; grid-template-columns:2fr 1fr; gap:10px; }
+
+/* PK / IN / LIKE CHIPS */
+.pk-chips { display:flex; flex-direction:row; flex-wrap:wrap; gap:6px; min-height:32px; }
+.chip-row { display:flex; flex-direction:column; gap:4px; }
+.chip-row-header { display:flex; align-items:center; gap:6px; }
+.chip-row-lbl { font-size:.63rem; font-weight:700; padding:2px 6px; border-radius:3px; white-space:nowrap; flex-shrink:0; }
+.chip-row-lbl.base-lbl { color:var(--text); background:var(--surface3); border:1px solid var(--border); }
+.chip-row-lbl.join-lbl { color:var(--yellow); background:rgba(227,179,65,.1); border:1px solid rgba(227,179,65,.25); }
+.chip-filter { flex:1; font-size:.72rem; padding:2px 7px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--fg); outline:none; min-width:0; }
+.chip-filter:focus { border-color:var(--primary); }
+.chip-row-chips { display:flex; flex-wrap:wrap; gap:5px; }
+.pk-chip { padding:3px 10px; border-radius:20px; font-size:.82rem; font-weight:500; cursor:pointer; border:1.5px solid var(--border); background:var(--surface3); color:var(--muted); transition:all .13s; user-select:none; }
+.pk-chip.active       { background:rgba(52,109,202,.2);   border-color:var(--primary-h); color:var(--primary-h); }
+.pk-chip.eq-active    { background:rgba(87,171,90,.15);   border-color:var(--green);     color:var(--green); }
+.pk-chip.in-active    { background:rgba(74,198,169,.15);  border-color:var(--teal);      color:var(--teal); }
+.pk-chip.like-active  { background:rgba(204,120,50,.15);  border-color:var(--orange);    color:var(--orange); }
+.pk-chip.date-active  { background:rgba(179,146,240,.15); border-color:var(--purple);    color:var(--purple); }
+.pk-chip.disabled     { opacity:0.28; cursor:not-allowed; filter:grayscale(1); pointer-events:none; }
+.pk-chip { display:inline-flex; align-items:center; gap:4px; }
+.chip-remove { cursor:pointer; font-size:.6rem; opacity:.5; line-height:1; padding:0 1px; flex-shrink:0; }
+.chip-remove:hover { opacity:1; color:#e06060; }
+.cond-combo { flex:1; min-width:160px; }
+.pk-hint { font-size:.7rem; color:var(--muted); margin-top:4px; }
+
+/* 조건 컬럼 그룹 */
+.cond-group { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0; display:flex; flex-direction:column; }
+.cond-group-title { padding:10px 14px; font-size:.95rem; font-weight:700; color:var(--text); border-bottom:1px solid var(--border); }
+.cond-section { padding:12px 14px; display:flex; flex-direction:column; gap:6px; border-left:3px solid transparent; }
+.cond-section + .cond-section { border-top:1px solid var(--border); }
+.cond-section.pk-sec   { border-left-color:var(--primary-h); }
+.cond-section.eq-sec   { border-left-color:var(--green); }
+.cond-section.in-sec   { border-left-color:var(--teal); }
+.cond-section.like-sec { border-left-color:var(--orange); }
+.cond-section.date-sec { border-left-color:var(--purple); }
+.cond-section label { font-size:.82rem; font-weight:700; color:var(--text); }
+
+/* JOIN SECTION */
+.join-section-hdr { display:flex; align-items:center; justify-content:space-between; }
+.join-section-hdr .lbl { font-size:.92rem; font-weight:700; color:var(--text); }
+.base-card { background:var(--bg); border:1px solid rgba(56,139,253,.25); border-left:3px solid var(--primary-h); border-radius:6px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+.base-card-lbl { font-size:.92rem; font-weight:700; color:var(--text); letter-spacing:.04em; }
+.join-card { background:var(--bg); border:1px solid rgba(227,179,65,.35); border-left:3px solid var(--yellow); border-radius:6px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; margin-top:5px; }
+.join-row-main { display:flex; gap:6px; align-items:center; }
+.join-type { width:115px; flex-shrink:0; }
+.join-alias-input { width:64px !important; flex-shrink:0; }
+.join-cols-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.join-sub-lbl { font-size:.75rem; color:var(--text); margin-bottom:3px; font-weight:600; }
+.btn-remove { background:transparent; border:1px solid rgba(244,112,103,.3); color:var(--red); border-radius:4px; cursor:pointer; padding:3px 7px; font-size:.8rem; flex-shrink:0; transition:all .13s; }
+.btn-remove:hover { background:rgba(244,112,103,.15); }
+/* ON BUILDER */
+.on-builder { display:flex; flex-direction:column; gap:5px; }
+.on-builder-row { display:flex; gap:5px; align-items:center; }
+.on-eq { color:var(--muted); font-size:.85rem; font-weight:700; flex-shrink:0; padding:0 3px; }
+.on-combo { position:relative; flex:1; min-width:0; }
+.on-combo-input { width:100%; box-sizing:border-box; font-size:.78rem; padding:3px 6px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--fg); outline:none; }
+.on-combo-input:focus { border-color:var(--primary); }
+.on-combo-drop { position:absolute; top:calc(100% + 2px); left:0; right:0; background:var(--surface); border:1px solid var(--border); border-radius:4px; max-height:180px; overflow-y:auto; z-index:200; display:none; box-shadow:0 4px 12px rgba(0,0,0,.35); }
+.on-combo-drop.open { display:block; }
+.on-combo-drop .copt-group { padding:4px 8px; font-size:.67rem; font-weight:700; color:var(--text); text-transform:uppercase; background:var(--primary); opacity:0.85; position:sticky; top:0; border-bottom:1px solid var(--border); }
+.on-combo-drop .copt { padding:4px 10px; font-size:.9rem; cursor:pointer; color:var(--fg); }
+.on-combo-drop .copt:hover { background:var(--primary); color:#fff; }
+.on-combo-drop .copt.kbd-active { background:var(--primary); color:#fff; }
+.on-combo-drop .copt.hidden { display:none; }
+.on-cond-list { display:flex; flex-direction:column; gap:3px; }
+.on-cond-item { display:flex; align-items:center; gap:6px; background:var(--surface3); border:1px solid var(--border); border-radius:4px; padding:3px 8px; }
+.on-cond-text { flex:1; font-family:'Consolas','Fira Code',monospace; font-size:.85rem; color:var(--cyan); }
+
+/* OPTIONS */
+.option-grid { display:flex; flex-direction:column; gap:6px; }
+.opt-row { display:flex; align-items:center; gap:8px; }
+.opt-row input[type=checkbox] { width:14px; height:14px; accent-color:var(--primary-h); cursor:pointer; flex-shrink:0; }
+.opt-row label { font-size:.8rem; color:var(--text); cursor:pointer; flex:1; }
+
+/* BUTTONS */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:6px; cursor:pointer; font-family:inherit; font-weight:600; font-size:.82rem; padding:7px 14px; transition:all .13s; }
+.btn:active { transform:scale(.96); }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:var(--primary-h); }
+.btn-gen { background:linear-gradient(135deg,#316dca,#7e5bef); color:#fff; font-size:.9rem; padding:10px; width:100%; }
+.btn-gen:hover { filter:brightness(1.1); }
+.btn-ghost { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover { background:var(--surface3); }
+.btn-copy { background:rgba(87,171,90,.15); color:var(--green); border:1px solid rgba(87,171,90,.3); font-size:.75rem; padding:4px 10px; }
+.btn-copy:hover { background:rgba(87,171,90,.25); }
+.btn-copy-all { background:var(--green); color:#0d1117; padding:8px 16px; }
+.btn-copy-all:hover { filter:brightness(1.1); }
+.btn-xs { padding:3px 8px; font-size:.72rem; }
+
+/* OUTPUT */
+.output-panel { display:flex; flex-direction:column; overflow:hidden; }
+.output-header { padding:8px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0; flex-shrink:0; flex-wrap:wrap; }
+.output-label { background:var(--primary); color:#fff; padding:3px 10px; border-radius:4px; font-size:.72rem; font-weight:700; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
+.output-divider { width:1px; height:20px; background:var(--border); margin:0 12px; flex-shrink:0; }
+.q-tabs { display:flex; gap:2px; overflow-x:auto; flex:1; }
+.q-tab { padding:4px 12px; border-radius:5px; font-size:.75rem; font-weight:700; cursor:pointer; color:var(--muted); transition:all .13s; white-space:nowrap; border:1px solid transparent; }
+.q-tab:hover { color:var(--text); }
+.q-tab.active { background:var(--surface3); color:var(--text); border-color:var(--border); }
+.code-wrap { flex:1; overflow-y:auto; }
+.code-block { display:none; flex-direction:column; height:100%; }
+.code-block.active { display:flex; }
+.code-toolbar { padding:7px 14px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.code-toolbar .desc { font-size:.75rem; color:var(--muted); flex:1; }
+.code-pre { flex:1; overflow:auto; padding:16px 18px; font-family:'Consolas','Fira Code',monospace; font-size:.8rem; line-height:1.75; white-space:pre; background:var(--bg); color:var(--text); }
+.empty-msg { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--muted); gap:10px; font-size:.9rem; text-align:center; line-height:1.8; }
+.empty-msg .icon { font-size:2.5rem; }
+
+/* HIGHLIGHT */
+.xt { color:var(--xml-tag); }
+.xb { color:var(--muted); }
+.xa { color:var(--xml-attr); }
+.xv { color:var(--xml-val); }
+.xc { color:var(--xml-cmt); font-style:italic; }
+.sk { color:var(--sql-kw); font-weight:700; }
+.st { color:var(--yellow); }
+.sp { color:var(--sql-param); }
+.si { color:var(--purple); }
+
+/* TOAST */
+#toast { position:fixed; bottom:18px; right:18px; background:var(--surface3); color:var(--text); padding:8px 16px; border-radius:8px; font-size:.82rem; font-weight:600; border:1px solid var(--border); opacity:0; transform:translateY(8px); transition:all .22s; z-index:100; }
+#toast.show { opacity:1; transform:translateY(0); }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:3px; }
+
+/* THEME TOGGLE */
+.btn-theme { background:var(--surface2); color:var(--text); border:1px solid var(--border); width:32px; padding:0; height:28px; font-size:1rem; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; transition:all .15s; flex-shrink:0; }
+.btn-theme:hover { background:var(--surface3); }
+
+@media (max-width:700px) {
+  .layout { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .panel { border-right:none; border-bottom:1px solid var(--border); max-height:50vh; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗂️ <span class="logo">MyBatis</span> <span class="sub">CRUD Generator</span></h1>
+  <div class="hdr-actions">
+    <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
+    <button class="btn btn-copy-all btn-xs" onclick="copyAll()">전체 복사</button>
+    <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="테마 전환">🌙</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT -->
+  <div class="panel">
+    <div class="panel-title">입력</div>
+    <div class="panel-body">
+
+      <!-- Namespace: 맨위 한줄 -->
+      <div class="namespace-bar">
+        <label>Namespace</label>
+        <input type="text" id="namespace" placeholder="com.example.mapper.UserMapper" oninput="onInputChange()" />
+      </div>
+
+      <!-- 베이스 테이블 카드 -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="base-card-lbl">베이스 테이블</span>
+      <div class="base-card">
+        <div class="row3">
+          <div class="field">
+            <label>테이블명</label>
+            <input type="text" id="table-name" placeholder="TB_USER" oninput="onInputChange()" />
+          </div>
+          <div class="field">
+            <label>테이블 별칭 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
+            <input type="text" id="table-alias" placeholder="t" oninput="onInputChange()" />
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+          <div class="field">
+            <label>컬럼 목록 (줄 구분)</label>
+            <textarea id="columns" rows="9"
+              placeholder="USER_ID&#10;USER_NAME&#10;EMAIL&#10;PHONE_NO&#10;STATUS_CD&#10;REG_DT&#10;UPD_DT"
+              oninput="onInputChange()" style="height:192px"></textarea>
+          </div>
+          <div class="field">
+            <label>주석 (컬럼 순서 일치, 줄 구분)</label>
+            <textarea id="comments" rows="9"
+              placeholder="사용자 ID&#10;사용자 이름&#10;이메일&#10;전화번호&#10;상태 코드&#10;등록일시&#10;수정일시"
+              oninput="onInputChange()" style="height:192px"></textarea>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- JOIN 섹션 (베이스 테이블과 시각적으로 구분되는 카드) -->
+      <div>
+        <div class="join-section-hdr">
+          <span class="lbl">JOIN 테이블</span>
+          <button class="btn btn-ghost btn-xs" onclick="addJoin()">+ JOIN 추가</button>
+        </div>
+        <div id="join-list"></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="base-card-lbl">SELECT LIST 조건</span>
+      <div class="cond-group">
+
+        <div class="cond-section eq-sec">
+          <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
+            <label style="white-space:nowrap;flex-shrink:0;">= 조건 컬럼</label>
+            <div class="cond-combo on-combo">
+              <input class="on-combo-input" id="eq-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="eq" autocomplete="off"
+                oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
+              <div class="on-combo-drop"></div>
+            </div>
+          </div>
+          <div class="pk-chips" id="eq-chips"></div>
+        </div>
+
+        <div class="cond-section in-sec">
+          <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
+            <label style="white-space:nowrap;flex-shrink:0;">IN 조건 컬럼</label>
+            <div class="cond-combo on-combo">
+              <input class="on-combo-input" id="in-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="in" autocomplete="off"
+                oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
+              <div class="on-combo-drop"></div>
+            </div>
+          </div>
+          <div class="pk-chips" id="in-chips"></div>
+        </div>
+
+        <div class="cond-section like-sec">
+          <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
+            <label style="white-space:nowrap;flex-shrink:0;">LIKE 조건 컬럼</label>
+            <div class="cond-combo on-combo">
+              <input class="on-combo-input" id="like-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="like" autocomplete="off"
+                oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
+              <div class="on-combo-drop"></div>
+            </div>
+          </div>
+          <div class="pk-chips" id="like-chips"></div>
+        </div>
+
+        <div class="cond-section date-sec">
+          <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
+            <label style="white-space:nowrap;flex-shrink:0;">날짜 범위 컬럼</label>
+            <div class="cond-combo on-combo">
+              <input class="on-combo-input" id="date-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="date" autocomplete="off"
+                oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
+              <div class="on-combo-drop"></div>
+            </div>
+          </div>
+          <div class="pk-chips" id="date-chips"></div>
+        </div>
+
+      </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="base-card-lbl">단건 조회 / UPDATE / DELETE 조건</span>
+      <div class="cond-group">
+        <div class="cond-section pk-sec" style="border-radius:8px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
+            <label style="white-space:nowrap;flex-shrink:0;">PK 컬럼 선택</label>
+            <div class="cond-combo on-combo">
+              <input class="on-combo-input" id="pk-combo" type="text" placeholder="컬럼 검색 후 선택..." autocomplete="off"
+                oninput="filterPkCombo(this)" onfocus="openPkCombo(this)" onblur="closeOnComboDelay(this)">
+              <div class="on-combo-drop"></div>
+            </div>
+          </div>
+          <div class="pk-chips" id="pk-chips"></div>
+        </div>
+      </div>
+      </div>
+
+      <div class="field">
+        <label>옵션</label>
+        <div class="option-grid">
+          <div class="opt-row">
+            <input type="checkbox" id="opt-dynamic-update" checked onchange="onInputChange()" />
+            <label for="opt-dynamic-update">UPDATE에 동적 &lt;set&gt; 사용</label>
+          </div>
+          <div class="opt-row">
+            <input type="checkbox" id="opt-useGeneratedKeys" onchange="onInputChange()" />
+            <label for="opt-useGeneratedKeys">INSERT useGeneratedKeys</label>
+          </div>
+          <div class="opt-row">
+            <input type="checkbox" id="opt-wrap-mapper" checked onchange="onInputChange()" />
+            <label for="opt-wrap-mapper">&lt;mapper&gt; 태그로 감싸기</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gen" onclick="generate()">⚡ CRUD 쿼리 생성 (Ctrl+Enter)</button>
+
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="output-panel">
+    <div class="output-header">
+      <span class="output-label">결&nbsp;과</span>
+      <div class="output-divider"></div>
+      <div class="q-tabs">
+        <div class="q-tab active"       onclick="switchTab('all',this)">전체</div>
+        <div class="q-tab"              onclick="switchTab('select-one',this)">SELECT</div>
+        <div class="q-tab"              onclick="switchTab('select-list',this)">SELECT LIST</div>
+        <div class="q-tab"              onclick="switchTab('insert',this)">INSERT</div>
+        <div class="q-tab"              onclick="switchTab('update',this)">UPDATE</div>
+        <div class="q-tab"              onclick="switchTab('delete',this)">DELETE</div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+
+      <div class="code-block active" id="block-all">
+        <div class="code-toolbar">
+          <span class="desc">전체 CRUD 쿼리</span>
+          <button class="btn btn-copy" onclick="copyBlock('all')">📋 전체 복사</button>
+        </div>
+        <div class="code-pre empty-msg" id="code-all">
+          <span class="icon">🗂️</span>
+          <span>왼쪽에 테이블명과 컬럼을 입력 후<br>⚡ 버튼을 눌러 생성하세요</span>
+        </div>
+      </div>
+
+      <div class="code-block" id="block-select-one">
+        <div class="code-toolbar">
+          <span class="desc">단건 조회 — PK로 하나의 행 조회</span>
+          <button class="btn btn-copy" onclick="copyBlock('select-one')">📋 복사</button>
+        </div>
+        <div class="code-pre" id="code-select-one"></div>
+      </div>
+
+      <div class="code-block" id="block-select-list">
+        <div class="code-toolbar">
+          <span class="desc">목록 조회 — 동적 조건으로 다건 조회</span>
+          <button class="btn btn-copy" onclick="copyBlock('select-list')">📋 복사</button>
+        </div>
+        <div class="code-pre" id="code-select-list"></div>
+      </div>
+
+      <div class="code-block" id="block-insert">
+        <div class="code-toolbar">
+          <span class="desc">등록 — 새 행 삽입</span>
+          <button class="btn btn-copy" onclick="copyBlock('insert')">📋 복사</button>
+        </div>
+        <div class="code-pre" id="code-insert"></div>
+      </div>
+
+      <div class="code-block" id="block-update">
+        <div class="code-toolbar">
+          <span class="desc">수정 — PK 기준 행 업데이트</span>
+          <button class="btn btn-copy" onclick="copyBlock('update')">📋 복사</button>
+        </div>
+        <div class="code-pre" id="code-update"></div>
+      </div>
+
+      <div class="code-block" id="block-delete">
+        <div class="code-toolbar">
+          <span class="desc">삭제 — PK 기준 행 삭제</span>
+          <button class="btn btn-copy" onclick="copyBlock('delete')">📋 복사</button>
+        </div>
+        <div class="code-pre" id="code-delete"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+let pkCols   = new Set();
+let eqCols   = new Set();   // SELECT LIST WHERE = 조건으로 생성할 컬럼
+let inCols   = new Set();   // IN 조건으로 생성할 컬럼
+let likeCols = new Set();   // LIKE 조건으로 생성할 컬럼
+let dateCols = new Set();   // 날짜 범위(_from/_to) 조건으로 생성할 컬럼
+let generatedSQL = {};
+
+/* ── name converters ── */
+function toCamel(col) {
+  return col.trim().toLowerCase().replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
+function toPascal(str) {
+  const c = toCamel(str);
+  return c.charAt(0).toUpperCase() + c.slice(1);
+}
+// MyBatis 파라미터용 소문자 snake_case 변환 (USER_ID → user_id)
+function toSnake(col) { return col.trim().toLowerCase(); }
+function param(col) { return '#{p.' + toSnake(col) + '}'; }
+
+function getColumns() {
+  return document.getElementById('columns').value
+    .split('\n').map(c => c.trim().replace(/,/g, '')).filter(Boolean);
+}
+
+/* 주석 textarea → 컬럼 순서와 1:1 대응하는 배열 */
+function getComments() {
+  const raw = document.getElementById('comments').value.split('\n');
+  return raw.map(c => c.trim());
+}
+
+/* col → comment 매핑 빌드 */
+function buildCmap(cols, cmts) {
+  const cmap = {};
+  cols.forEach((c, i) => { if (cmts[i]) cmap[c] = cmts[i]; });
+  return cmap;
+}
+function getTable()     { return document.getElementById('table-name').value.trim().toUpperCase(); }
+function getAlias()     { return document.getElementById('table-alias').value.trim(); }
+function getNamespace() { return document.getElementById('namespace').value.trim(); }
+function getEntityName() {
+  const t = document.getElementById('table-name').value.trim();
+  if (!t) return 'Entity';
+  return t.replace(/^(TBL?_|TB_|T_)/i,'').split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+}
+
+/* ── 칩 키 헬퍼 ── */
+// prefix 있으면 "prefix.col", 없으면 "col" (소문자 통일)
+function colKeyFull(col, prefix) { return prefix ? prefix.toLowerCase() + '.' + col.toLowerCase() : col.toLowerCase(); }
+// "T.USER_ID" → "t.user_id",  "USER_ID" → "user_id"
+function keyToSqlRef(key) { return key.toLowerCase(); }
+// "T.USER_ID" → "user_id",  "R.ROLE_ID" → "role_id"
+function keyToParamSnake(key) {
+  const dot = key.lastIndexOf('.');
+  return toSnake(dot === -1 ? key : key.slice(dot + 1));
+}
+// 베이스 + 조인 전체 칩 키 배열 빌드
+function buildAllCondKeys(cols, alias, joins) {
+  const keys = [];
+  cols.forEach(c => keys.push(colKeyFull(c, alias)));
+  joins.forEach(j => {
+    const prefix = j.alias || j.table;
+    j.cols.forEach(c => keys.push(colKeyFull(c, prefix)));
+  });
+  return keys;
+}
+function getAllCondKeys() { return buildAllCondKeys(getColumns(), getAlias(), getJoins()); }
+// JOIN 있을 때 베이스 테이블 prefix: alias 있으면 alias, 없으면 테이블명
+function mainPrefix(alias, table, joins) { return alias || (joins.length > 0 ? table : ''); }
+
+/* ── JOIN 관리 ── */
+function getJoins() {
+  const rows = document.querySelectorAll('.join-card');
+  const joins = [];
+  rows.forEach(row => {
+    const type  = row.querySelector('.join-type').value;
+    const table = row.querySelector('.join-table').value.trim().toUpperCase();
+    const alias = row.querySelector('.join-alias-input').value.trim();
+    const onItems = [...row.querySelectorAll('.on-cond-item')];
+    const on = onItems.map(item => item.dataset.left + ' = ' + item.dataset.right).join(' AND ');
+    const colsRaw = row.querySelector('.join-columns').value
+      .split('\n').map(c => c.trim().replace(/,/g, '')).filter(Boolean);
+    const cmtsRaw = row.querySelector('.join-comments').value.split('\n').map(c => c.trim());
+    const cmap = {};
+    colsRaw.forEach((c, i) => { if (cmtsRaw[i]) cmap[c] = cmtsRaw[i]; });
+    if (table) joins.push({ type, table, alias, on, cols: colsRaw, cmap });
+  });
+  return joins;
+}
+
+function addJoin() {
+  const list  = document.getElementById('join-list');
+  const card  = document.createElement('div');
+  card.className = 'join-card';
+  card.innerHTML = `
+    <div class="join-row-main">
+      <select class="join-type" onchange="onInputChange()">
+        <option>LEFT JOIN</option>
+        <option>INNER JOIN</option>
+        <option>RIGHT JOIN</option>
+      </select>
+      <input type="text" class="join-table" placeholder="TB_ORDER" oninput="onInputChange()" style="flex:1" />
+      <input type="text" class="join-alias-input" placeholder="별칭" oninput="onInputChange()" />
+      <button class="btn-remove" onclick="removeJoin(this)" title="제거">✕</button>
+    </div>
+    <div class="join-cols-grid">
+      <div>
+        <div class="join-sub-lbl">컬럼 목록 (줄 구분)</div>
+        <textarea class="join-columns" placeholder="ORDER_ID&#10;AMOUNT" oninput="onInputChange()" style="height:88px"></textarea>
+      </div>
+      <div>
+        <div class="join-sub-lbl">주석 (컬럼 순서 일치)</div>
+        <textarea class="join-comments" placeholder="주문 ID&#10;금액" oninput="onInputChange()" style="height:88px"></textarea>
+      </div>
+    </div>
+    <div class="on-builder">
+      <div class="join-sub-lbl">ON 조건</div>
+      <div class="on-builder-row">
+        <div class="on-combo">
+          <input class="on-left-sel on-combo-input" type="text" placeholder="LEFT 컬럼 검색..." autocomplete="off"
+            oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
+          <div class="on-combo-drop"></div>
+        </div>
+        <span class="on-eq">=</span>
+        <div class="on-combo">
+          <input class="on-right-sel on-combo-input" type="text" placeholder="RIGHT 컬럼 검색..." autocomplete="off"
+            oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
+          <div class="on-combo-drop"></div>
+        </div>
+        <button class="btn btn-ghost btn-xs" onclick="addOnCond(this)" type="button">+ 추가</button>
+      </div>
+      <div class="on-cond-list"></div>
+    </div>
+  `;
+  list.appendChild(card);
+  onInputChange();
+}
+
+function removeJoin(btn) {
+  btn.closest('.join-card').remove();
+  onInputChange();
+}
+
+function addOnCond(btn) {
+  const card     = btn.closest('.join-card');
+  const leftSel  = card.querySelector('.on-left-sel');
+  const rightSel = card.querySelector('.on-right-sel');
+  const leftVal  = leftSel.dataset.selectedValue || '';
+  const rightVal = rightSel.dataset.selectedValue || '';
+  if (!leftVal || !rightVal) return;
+  const list = card.querySelector('.on-cond-list');
+  const item = document.createElement('div');
+  item.className = 'on-cond-item';
+  item.dataset.left  = leftVal;
+  item.dataset.right = rightVal;
+  item.innerHTML =
+    '<span class="on-cond-text">' + leftVal + ' = ' + rightVal + '</span>' +
+    '<button class="btn-remove" onclick="removeOnCond(this)" title="제거">✕</button>';
+  list.appendChild(item);
+  leftSel.value = ''; delete leftSel.dataset.selectedValue;
+  rightSel.value = ''; delete rightSel.dataset.selectedValue;
+  onInputChange();
+}
+
+function removeOnCond(btn) {
+  btn.closest('.on-cond-item').remove();
+  onInputChange();
+}
+
+/* ── ON 콤보박스 ── */
+function openOnCombo(input) {
+  const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+  drop.classList.add('open');
+  filterOnCombo(input);
+}
+function closeOnComboDelay(input) {
+  setTimeout(() => {
+    const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+    drop.querySelectorAll('.copt.kbd-active').forEach(el => el.classList.remove('kbd-active'));
+    drop.classList.remove('open');
+  }, 200);
+}
+function onComboKeydown(e, input) {
+  const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+  const isOpen = drop.classList.contains('open');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (!isOpen) drop.classList.add('open');
+    const opts = [...drop.querySelectorAll('.copt:not(.hidden)')];
+    if (!opts.length) return;
+    const cur = drop.querySelector('.copt.kbd-active');
+    let idx = cur ? opts.indexOf(cur) : -1;
+    if (cur) cur.classList.remove('kbd-active');
+    idx = e.key === 'ArrowDown' ? (idx + 1) % opts.length : (idx - 1 + opts.length) % opts.length;
+    opts[idx].classList.add('kbd-active');
+    opts[idx].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    const active = drop.querySelector('.copt.kbd-active');
+    if (active) {
+      e.preventDefault();
+      active.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      setTimeout(() => {
+        if (document.activeElement === input && input.closest('.cond-combo')) drop.classList.add('open');
+      }, 0);
+    }
+  } else if (e.key === 'Escape') {
+    drop.querySelectorAll('.copt.kbd-active').forEach(el => el.classList.remove('kbd-active'));
+    drop.classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.target.classList.contains('on-combo-input')) onComboKeydown(e, e.target);
+});
+function filterOnCombo(input) {
+  const q = input.value.toLowerCase();
+  if (input.dataset.selectedValue && input.value !== input.dataset.selectedValue) {
+    delete input.dataset.selectedValue;
+  }
+  const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+  drop.querySelectorAll('.copt').forEach(opt => {
+    opt.classList.toggle('hidden', !!q && !opt.dataset.value.includes(q));
+  });
+}
+function selectOnCombo(el, value) {
+  const combo = el.closest('.on-combo');
+  const input = combo.querySelector('.on-combo-input');
+  const dot = value.indexOf('.');
+  input.value = dot === -1 ? value : value.slice(dot + 1);
+  input.dataset.selectedValue = value;
+  combo.querySelector('.on-combo-drop').classList.remove('open');
+}
+
+function updateOnConds(oldPrefix, newPrefix) {
+  if (!oldPrefix || oldPrefix === newPrefix) return;
+  const oldDot = oldPrefix.toUpperCase() + '.';
+  document.querySelectorAll('.on-cond-item').forEach(item => {
+    let left  = item.dataset.left  || '';
+    let right = item.dataset.right || '';
+    let changed = false;
+    if (left.toUpperCase().startsWith(oldDot)) {
+      left  = newPrefix + left.slice(oldPrefix.length);
+      changed = true;
+    }
+    if (right.toUpperCase().startsWith(oldDot)) {
+      right = newPrefix + right.slice(oldPrefix.length);
+      changed = true;
+    }
+    if (changed) {
+      item.dataset.left  = left;
+      item.dataset.right = right;
+      item.querySelector('.on-cond-text').textContent = left + ' = ' + right;
+    }
+  });
+  // 콤보 input selectedValue도 갱신
+  document.querySelectorAll('.on-combo-input').forEach(input => {
+    const sv = input.dataset.selectedValue || '';
+    if (!sv) return;
+    const svUpper = sv.toUpperCase();
+    if (svUpper.startsWith(oldDot)) {
+      const updated = newPrefix + sv.slice(oldPrefix.length);
+      const d = updated.indexOf('.');
+      input.value = d === -1 ? updated : updated.slice(d + 1);
+      input.dataset.selectedValue = updated;
+    }
+  });
+}
+
+function refreshOnSelects() {
+  const baseCols  = getColumns();
+  const baseTable = getTable();
+  const baseAlias = getAlias();
+  const cards     = document.querySelectorAll('.join-card');
+  // Collect light join info from DOM (without calling getJoins to avoid recursion)
+  const joinInfos = [...cards].map(c => ({
+    table: c.querySelector('.join-table').value.trim().toUpperCase(),
+    alias: c.querySelector('.join-alias-input').value.trim(),
+    cols:  c.querySelector('.join-columns').value.split('\n').map(s => s.trim().replace(/,/g,'')).filter(Boolean)
+  }));
+  const basePrefix = baseAlias || (joinInfos.length > 0 ? baseTable : '');
+
+  // ── ON 조건 별칭 자동 갱신 ──
+  const aliasEl = document.getElementById('table-alias');
+  if ('prevPrefix' in aliasEl.dataset) {
+    updateOnConds(aliasEl.dataset.prevPrefix, basePrefix);
+  }
+  aliasEl.dataset.prevPrefix = basePrefix;
+  [...cards].forEach((card, idx) => {
+    const ji = joinInfos[idx];
+    const curPrefix = ji.alias || ji.table;
+    if ('prevPrefix' in card.dataset) {
+      updateOnConds(card.dataset.prevPrefix, curPrefix);
+    }
+    card.dataset.prevPrefix = curPrefix;
+  });
+
+  cards.forEach((card, idx) => {
+    const ji = joinInfos[idx];
+    const joinPrefix = ji.alias || ji.table;
+
+    // LEFT COMBO: this join's columns
+    const leftSel = card.querySelector('.on-left-sel');
+    const leftCur = leftSel.dataset.selectedValue || '';
+    const leftDrop = leftSel.closest('.on-combo').querySelector('.on-combo-drop');
+    leftDrop.innerHTML = ji.cols.length
+      ? '<div class="copt-group">' + (joinPrefix || ji.table || 'JOIN').toUpperCase() + '</div>' +
+        ji.cols.map(c => {
+          const key = joinPrefix ? joinPrefix + '.' + c.toLowerCase() : c.toLowerCase();
+          const lbl = c.toLowerCase();
+          return '<div class="copt" data-value="' + key + '" onmousedown="selectOnCombo(this,\'' + key + '\')">' + lbl + '</div>';
+        }).join('')
+      : '<div class="copt" style="color:var(--muted);cursor:default">-- 컬럼 없음 --</div>';
+    if (leftCur && [...leftDrop.querySelectorAll('.copt')].some(o => o.dataset.value === leftCur)) {
+      const d = leftCur.indexOf('.'); leftSel.value = d === -1 ? leftCur : leftCur.slice(d + 1); leftSel.dataset.selectedValue = leftCur;
+    } else { leftSel.value = ''; delete leftSel.dataset.selectedValue; }
+
+    // RIGHT COMBO: base table + other joins (groups)
+    const rightSel = card.querySelector('.on-right-sel');
+    const rightCur = rightSel.dataset.selectedValue || '';
+    let html = '';
+    if (baseCols.length) {
+      const baseLabel = basePrefix || baseTable || '베이스 테이블';
+      html += '<div class="copt-group">' + baseLabel + '</div>';
+      baseCols.forEach(c => {
+        const key = basePrefix ? basePrefix + '.' + c.toLowerCase() : c.toLowerCase();
+        const lbl = c.toLowerCase();
+        html += '<div class="copt" data-value="' + key + '" onmousedown="selectOnCombo(this,\'' + key + '\')">' + lbl + '</div>';
+      });
+    }
+    joinInfos.forEach((oji, oidx) => {
+      if (oidx === idx || !oji.cols.length) return;
+      const oPrefix = oji.alias || oji.table;
+      html += '<div class="copt-group">' + (oPrefix || oji.table) + '</div>';
+      oji.cols.forEach(c => {
+        const key = oPrefix ? oPrefix + '.' + c.toLowerCase() : c.toLowerCase();
+        const lbl = c.toLowerCase();
+        html += '<div class="copt" data-value="' + key + '" onmousedown="selectOnCombo(this,\'' + key + '\')">' + lbl + '</div>';
+      });
+    });
+    const rightDrop = rightSel.closest('.on-combo').querySelector('.on-combo-drop');
+    rightDrop.innerHTML = html || '<div class="copt" style="color:var(--muted);cursor:default">-- 다른 테이블 없음 --</div>';
+    if (rightCur && [...rightDrop.querySelectorAll('.copt')].some(o => o.dataset.value === rightCur)) {
+      const d = rightCur.indexOf('.'); rightSel.value = d === -1 ? rightCur : rightCur.slice(d + 1); rightSel.dataset.selectedValue = rightCur;
+    } else { rightSel.value = ''; delete rightSel.dataset.selectedValue; }
+  });
+}
+
+/* ── PK chips ── */
+function renderPkChips() {
+  const cols = getColumns();
+  const wrap = document.getElementById('pk-chips');
+  [...pkCols].forEach(pk => { if (!cols.includes(pk)) pkCols.delete(pk); });
+  if (!pkCols.size) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = [...pkCols].map(pk =>
+    '<div class="pk-chip active">' + pk.toLowerCase() +
+    '<span class="chip-remove" onclick="removePk(\'' + pk + '\')" title="제거">✕</span>' +
+    '</div>'
+  ).join('');
+}
+
+function removePk(col) {
+  pkCols.delete(col);
+  renderPkChips();
+  refreshPkCombo();
+  if (getTable()) generate();
+}
+
+/* ── PK 콤보박스 ── */
+function openPkCombo(input) {
+  refreshPkCombo();
+  input.closest('.on-combo').querySelector('.on-combo-drop').classList.add('open');
+  filterPkCombo(input);
+}
+
+function filterPkCombo(input) {
+  const q = input.value.toLowerCase();
+  input.closest('.on-combo').querySelector('.on-combo-drop').querySelectorAll('.copt').forEach(opt => {
+    opt.classList.toggle('hidden', !!q && !opt.textContent.toLowerCase().includes(q));
+  });
+}
+
+function refreshPkCombo() {
+  const input = document.getElementById('pk-combo');
+  if (!input) return;
+  const cols = getColumns();
+  const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+  const available = cols.filter(c => !pkCols.has(c));
+  drop.innerHTML = available.length
+    ? available.map(c =>
+        '<div class="copt" data-value="' + c + '" onmousedown="selectPkCombo(this,\'' + c + '\')">' + c.toLowerCase() + '</div>'
+      ).join('')
+    : '<div class="copt" style="color:var(--muted);cursor:default">선택 가능한 컬럼 없음</div>';
+}
+
+function selectPkCombo(el, col) {
+  pkCols.add(col);
+  const input = el.closest('.on-combo').querySelector('.on-combo-input');
+  input.value = '';
+  el.closest('.on-combo').querySelector('.on-combo-drop').classList.remove('open');
+  renderPkChips();
+  refreshPkCombo();
+  if (getTable()) generate();
+}
+
+/* ── 조건 타입 이름 (툴팁용) ── */
+const COND_LABEL = { eq:'= 조건', in:'IN 조건', like:'LIKE 조건', date:'날짜 범위' };
+
+function condTakenBy(col, exclude) {
+  if (exclude !== 'eq'   && eqCols.has(col))   return COND_LABEL.eq;
+  if (exclude !== 'in'   && inCols.has(col))   return COND_LABEL.in;
+  if (exclude !== 'like' && likeCols.has(col)) return COND_LABEL.like;
+  if (exclude !== 'date' && dateCols.has(col)) return COND_LABEL.date;
+  return null;
+}
+
+/* ── 조건 칩 렌더러: 선택된 항목만 X버튼 칩으로 표시 ── */
+function renderCondChips(wrapId, activeSet, removeFn, activeClass) {
+  const wrap    = document.getElementById(wrapId);
+  const allKeys = buildAllCondKeys(getColumns(), mainPrefix(getAlias(), getTable(), getJoins()), getJoins());
+  [...activeSet].forEach(k => { if (!allKeys.includes(k)) activeSet.delete(k); });
+
+  if (!activeSet.size) {
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = [...activeSet].map(key => {
+    return '<div class="pk-chip ' + activeClass + '">'
+      + key
+      + '<span class="chip-remove" onclick="' + removeFn + '(\'' + key + '\')" title="제거">✕</span>'
+      + '</div>';
+  }).join('');
+}
+
+/* ── 조건 콤보박스 ── */
+function openCondCombo(input) {
+  const type = input.dataset.condType;
+  const sets = { eq: eqCols, in: inCols, like: likeCols, date: dateCols };
+  refreshCondCombo(input, sets[type], type);
+  const drop = input.closest('.on-combo').querySelector('.on-combo-drop');
+  drop.classList.add('open');
+  filterCondCombo(input);
+}
+
+function filterCondCombo(input) {
+  const q = input.value.toLowerCase();
+  input.closest('.on-combo').querySelector('.on-combo-drop').querySelectorAll('.copt').forEach(opt => {
+    opt.classList.toggle('hidden', !!q && !opt.textContent.toLowerCase().includes(q));
+  });
+}
+
+function refreshCondCombo(input, activeSet, type) {
+  const joins    = getJoins();
+  const mainCols = getColumns();
+  const mPrefix  = mainPrefix(getAlias(), getTable(), joins);
+  const hasJoins = joins.some(j => j.cols.length > 0);
+  const drop     = input.closest('.on-combo').querySelector('.on-combo-drop');
+
+  if (!mainCols.length) {
+    drop.innerHTML = '<div class="copt" style="color:var(--muted);cursor:default">컬럼을 먼저 입력하세요</div>';
+    return;
+  }
+
+  function makeOpt(key) {
+    if (activeSet.has(key) || condTakenBy(key, type)) return '';
+    const lbl = key.includes('.') ? key.slice(key.indexOf('.') + 1) : key;
+    return '<div class="copt" data-value="' + key + '" onmousedown="selectCondCombo(this,\'' + key + '\',\'' + type + '\')">' + lbl + '</div>';
+  }
+
+  let html = '';
+  const mainKeys = mainCols.map(c => colKeyFull(c, mPrefix));
+
+  if (!hasJoins) {
+    mainKeys.forEach(k => { html += makeOpt(k); });
+  } else {
+    const baseLabel = (mPrefix || getTable() || 'BASE').toUpperCase();
+    const baseHtml  = mainKeys.map(makeOpt).join('');
+    if (baseHtml) html += '<div class="copt-group">' + baseLabel + '</div>' + baseHtml;
+    joins.forEach(j => {
+      if (!j.cols.length) return;
+      const prefix = j.alias || j.table;
+      const jHtml  = j.cols.map(c => makeOpt(colKeyFull(c, prefix))).join('');
+      if (jHtml) html += '<div class="copt-group">' + prefix.toUpperCase() + '</div>' + jHtml;
+    });
+  }
+
+  drop.innerHTML = html || '<div class="copt" style="color:var(--muted);cursor:default">선택 가능한 컬럼 없음</div>';
+}
+
+function selectCondCombo(el, key, type) {
+  const sets = { eq: eqCols, in: inCols, like: likeCols, date: dateCols };
+  sets[type].add(key);
+  const input = el.closest('.on-combo').querySelector('.on-combo-input');
+  input.value = '';
+  el.closest('.on-combo').querySelector('.on-combo-drop').classList.remove('open');
+  renderAllCondChips();
+  if (getTable()) generate();
+}
+
+function refreshAllCondCombos() {
+  const map = { eq: eqCols, in: inCols, like: likeCols, date: dateCols };
+  Object.entries(map).forEach(([type, set]) => {
+    const el = document.getElementById(type + '-combo');
+    if (el) refreshCondCombo(el, set, type);
+  });
+}
+
+function renderAllCondChips() {
+  renderEqChips(); renderInChips(); renderLikeChips(); renderDateChips();
+  refreshAllCondCombos();
+}
+
+function renderEqChips()   { renderCondChips('eq-chips',   eqCols,   'removeEq',   'eq-active'); }
+function renderInChips()   { renderCondChips('in-chips',   inCols,   'removeIn',   'in-active'); }
+function renderLikeChips() { renderCondChips('like-chips', likeCols, 'removeLike', 'like-active'); }
+function renderDateChips() { renderCondChips('date-chips', dateCols, 'removeDate', 'date-active'); }
+
+function removeEq(col)   { eqCols.delete(col);   renderAllCondChips(); if (getTable()) generate(); }
+function removeIn(col)   { inCols.delete(col);   renderAllCondChips(); if (getTable()) generate(); }
+function removeLike(col) { likeCols.delete(col); renderAllCondChips(); if (getTable()) generate(); }
+function removeDate(col) { dateCols.delete(col); renderAllCondChips(); if (getTable()) generate(); }
+
+function onInputChange() {
+  refreshOnSelects();
+  renderPkChips();
+  refreshPkCombo();
+  renderAllCondChips();
+  if (getTable() && getColumns().length > 0) generate();
+}
+
+/* ── SQL FORMAT HELPERS ── */
+
+function kwPfx(kw, ind) { return ind + kw.padStart(6) + ' '; }
+
+// alias 지원: alias 있으면 alias.col 형태로 반환 (컬럼명 소문자)
+function colRef(col, alias) { return alias ? alias + '.' + col.toLowerCase() : col.toLowerCase(); }
+
+function buildWherePk(pks, ind, kwWidth, alias) {
+  return pks.map((pk, i) =>
+    ind + (i === 0 ? 'WHERE' : 'AND').padStart(kwWidth) + ' ' + colRef(pk, alias) + ' = ' + param(pk)
+  ).join('\n');
+}
+
+// SELECT 컬럼 블록 (alias 지원, 단일 테이블용)
+function selColBlock(cols, cmap, ind, alias) {
+  const hasCmt  = cols.some(c => cmap[c]);
+  const refs    = cols.map(c => colRef(c, alias));
+  const maxLen  = hasCmt ? Math.max(...refs.map(r => r.length)) : 0;
+  return cols.map((c, i) => {
+    const ref  = refs[i];
+    const cmt  = cmap[c] ? '  /* ' + cmap[c] + ' */' : '';
+    const name = (hasCmt && cmt) ? ref.padEnd(maxLen) : ref;
+    return (i === 0 ? kwPfx('SELECT', ind) : kwPfx(',', ind)) + name + cmt;
+  }).join('\n');
+}
+
+// SELECT 컬럼 블록 (베이스 + JOIN 통합, 컬럼별 alias 지원)
+// 컬럼명이 같은 경우에도 각 테이블의 별칭이 올바르게 적용되도록
+// 컬럼명 키 대신 인덱스 기반 entries 배열로 관리
+function buildSelectBlock(mainCols, mainCmap, mainAlias, joins, ind) {
+  const entries = [];
+  mainCols.forEach(c => entries.push({ col: c, alias: mainAlias, cmt: mainCmap[c] || '' }));
+  joins.forEach(j => {
+    const jAlias = j.alias || j.table;
+    j.cols.forEach(c => entries.push({ col: c, alias: jAlias, cmt: j.cmap[c] || '' }));
+  });
+  if (!entries.length) return '';
+  const hasCmt = entries.some(e => e.cmt);
+  const refs   = entries.map(e => colRef(e.col, e.alias));
+  const maxLen = hasCmt ? Math.max(...refs.map(r => r.length)) : 0;
+  return entries.map((e, i) => {
+    const ref  = refs[i];
+    const cmt  = e.cmt ? '  /* ' + e.cmt + ' */' : '';
+    const name = (hasCmt && cmt) ? ref.padEnd(maxLen) : ref;
+    return (i === 0 ? kwPfx('SELECT', ind) : kwPfx(',', ind)) + name + cmt;
+  }).join('\n');
+}
+
+// JOIN 절 블록 생성
+// - LEFT/RIGHT/INNER 오른쪽 끝을 FROM 오른쪽 끝(padStart 6)에 맞춤
+// - ON 은 다음줄에 LEFT/RIGHT/INNER 오른쪽 끝과 동일 열 위치(padStart 6)
+// - AND 는 ON 오른쪽 끝과 동일 열 위치(padStart 6)
+function buildJoinBlock(joins, sqlInd) {
+  if (!joins.length) return null;
+  return joins.map(j => {
+    // j.type = "LEFT JOIN" | "INNER JOIN" | "RIGHT JOIN"
+    const keyword = j.type.split(' ')[0];          // LEFT / INNER / RIGHT
+    const jtable  = j.alias ? j.table + ' ' + j.alias : j.table;
+    const lines   = [sqlInd + keyword.padStart(6) + ' JOIN ' + jtable];
+
+    if (j.on) {
+      // AND 로 분리하여 ON + AND 각각 padStart(6) 정렬
+      const conds = j.on.split(/\s+AND\s+/i).map(c => c.trim()).filter(Boolean);
+      conds.forEach((cond, i) => {
+        const kw = i === 0 ? 'ON' : 'AND';
+        lines.push(sqlInd + kw.padStart(6) + ' ' + cond);
+      });
+    }
+    return lines.join('\n');
+  }).join('\n');
+}
+
+/* ── GENERATE ── */
+function generate() {
+  const table  = getTable();
+  const alias  = getAlias();
+  const cols   = getColumns();
+  const ns     = getNamespace();
+  const entity = getEntityName();
+  const joins  = getJoins();
+  if (!table || !cols.length) { toast('⚠️ 테이블명과 컬럼을 입력하세요'); return; }
+
+  const pks       = pkCols.size > 0 ? [...pkCols] : [cols[0]];
+  const nonPkCols = cols.filter(c => !pks.includes(c));
+
+  const dynUpd  = document.getElementById('opt-dynamic-update').checked;
+  const useGK   = document.getElementById('opt-useGeneratedKeys').checked;
+  const wrapMp  = document.getElementById('opt-wrap-mapper').checked;
+  const ind     = wrapMp ? '    ' : '';
+
+  /* 주석 매핑 */
+  const cmap      = buildCmap(cols, getComments());
+  const hasCmt    = Object.keys(cmap).length > 0;
+  const maxColLen = hasCmt ? Math.max(...cols.map(c => c.length)) : 0;
+
+  const sqlInd    = ind + '    ';
+  const fromTable = alias ? table + ' ' + alias : table;
+  const joinBlock = buildJoinBlock(joins, sqlInd);
+  // JOIN 있고 베이스 alias 없으면 테이블명을 prefix로 사용
+  const mPfx      = mainPrefix(alias, table, joins);
+
+  /* SELECT ONE */
+  const qSelectOne = [
+    ind+'<select id="select'+entity+'" parameterType="Map" resultType="Map">',
+    buildSelectBlock(cols, cmap, mPfx, joins, sqlInd),
+    kwPfx('FROM', sqlInd) + fromTable,
+    ...(joinBlock ? [joinBlock] : []),
+    buildWherePk(pks, sqlInd, 6, alias),
+    ind+'</select>'
+  ].join('\n');
+
+  /* SELECT LIST — 베이스 + JOIN 컬럼 모두 조건 대상 */
+  const allCondKeys = buildAllCondKeys(cols, mPfx, joins);
+  const ifConds = allCondKeys.map(key => {
+    const sqlRef = keyToSqlRef(key);
+    const snake  = keyToParamSnake(key);
+    if (inCols.has(key)) {
+      return sqlInd+'    <if test="p.'+snake+' != null and p.'+snake+'.size() > 0">\n'+
+             sqlInd+'        AND '+sqlRef+' IN\n'+
+             sqlInd+'        <foreach item="'+snake+'" collection="p.'+snake+'" open="(" separator="," close=")">\n'+
+             sqlInd+'            #{'+snake+'}\n'+
+             sqlInd+'        </foreach>\n'+
+             sqlInd+'    </if>';
+    }
+    if (likeCols.has(key)) {
+      return sqlInd+'    <if test=\'p.'+snake+' != null and p.'+snake+' != ""\'>\n'+
+             sqlInd+'        AND '+sqlRef+' LIKE \'%\' || #{p.'+snake+'} || \'%\'\n'+
+             sqlInd+'    </if>';
+    }
+    if (dateCols.has(key)) {
+      return sqlInd+'    <if test="p.'+snake+'_from != null and p.'+snake+'_from != \'\'">\n'+
+             sqlInd+'        AND '+sqlRef+' >= #{p.'+snake+'_from}\n'+
+             sqlInd+'    </if>\n'+
+             sqlInd+'    <if test="p.'+snake+'_to != null and p.'+snake+'_to != \'\'">\n'+
+             sqlInd+'        AND '+sqlRef+' <![CDATA[<=]]> #{p.'+snake+'_to}\n'+
+             sqlInd+'    </if>';
+    }
+    if (eqCols.has(key)) {
+      return sqlInd+'    <if test="p.'+snake+' != null and p.'+snake+' != \'\'">\n'+
+             sqlInd+'        AND '+sqlRef+' = #{p.'+snake+'}\n'+
+             sqlInd+'    </if>';
+    }
+    return null;
+  }).filter(Boolean).join('\n');
+  const qSelectList = [
+    ind+'<select id="select'+entity+'List" parameterType="Map" resultType="Map">',
+    buildSelectBlock(cols, cmap, mPfx, joins, sqlInd),
+    kwPfx('FROM', sqlInd) + fromTable,
+    ...(joinBlock ? [joinBlock] : []),
+    sqlInd+'<where>',
+    ifConds,
+    sqlInd+'</where>',
+    ind+'</select>'
+  ].join('\n');
+
+  /* INSERT — alias 미적용 (INSERT INTO 에는 별칭 불필요) */
+  const insCols   = cols;
+  const gkAttr    = useGK ? ' useGeneratedKeys="true" keyProperty="'+toSnake(pks[0])+'"' : '';
+  const insMaxLen = hasCmt ? Math.max(...insCols.map(c => c.length)) : 0;
+  const insColStr = insCols.map((c, i) => {
+    const comma  = i < insCols.length - 1 ? ',' : ' ';
+    const cmt    = cmap[c] ? '  /* ' + cmap[c] + ' */' : '';
+    const cLow   = c.toLowerCase();
+    const colPad = (hasCmt && cmt) ? (cLow + comma).padEnd(insMaxLen + 2) : cLow + comma;
+    return ind + '        ' + colPad + cmt;
+  }).join('\n');
+  const insValStr = insCols.map((c, i) =>
+    ind + '        ' + param(c) + (i < insCols.length - 1 ? ',' : '')
+  ).join('\n');
+  const qInsert = [
+    ind+'<insert id="insert'+entity+'" parameterType="Map"'+gkAttr+'>',
+    ind+'    INSERT INTO '+table+' (',
+    insColStr,
+    ind+'    ) VALUES (',
+    insValStr,
+    ind+'    )',
+    ind+'</insert>'
+  ].join('\n');
+
+  /* UPDATE — alias 미적용 */
+  const updMaxLen = Math.max(...nonPkCols.map(c => c.length));
+  let qUpdate;
+  if (dynUpd) {
+    const dynMaxExpr = hasCmt ? Math.max(...nonPkCols.map(c =>
+      (c.padEnd(updMaxLen) + ' = ' + param(c) + ',').length
+    )) : 0;
+    const setConds = nonPkCols.map(c => {
+      const cmt  = cmap[c] ? '  /* ' + cmap[c] + ' */' : '';
+      const expr = c.toLowerCase().padEnd(updMaxLen) + ' = ' + param(c) + ',';
+      const line = cmt ? expr.padEnd(dynMaxExpr) + cmt : expr;
+      return ind+'        <if test="p.'+toSnake(c)+' != null">\n'+
+             ind+'                '+line+'\n'+
+             ind+'        </if>';
+    }).join('\n');
+    qUpdate = [
+      ind+'<update id="update'+entity+'" parameterType="Map">',
+      ind+'    UPDATE '+table,
+      ind+'    <set>',
+      setConds,
+      ind+'    </set>',
+      buildWherePk(pks, ind, 10),
+      ind+'</update>'
+    ].join('\n');
+  } else {
+    const statMaxExpr = hasCmt ? Math.max(...nonPkCols.map((c, i) =>
+      (c.padEnd(updMaxLen) + ' = ' + param(c) + (i < nonPkCols.length - 1 ? ',' : '')).length
+    )) : 0;
+    const setStat = nonPkCols.map((c, i) => {
+      const comma = i < nonPkCols.length - 1 ? ',' : '';
+      const cmt   = cmap[c] ? '  /* ' + cmap[c] + ' */' : '';
+      const expr  = c.toLowerCase().padEnd(updMaxLen) + ' = ' + param(c) + comma;
+      const line  = cmt ? expr.padEnd(statMaxExpr) + cmt : expr;
+      return ind + '        ' + line;
+    }).join('\n');
+    qUpdate = [
+      ind+'<update id="update'+entity+'" parameterType="Map">',
+      ind+'    UPDATE '+table+' SET',
+      setStat,
+      buildWherePk(pks, ind, 10),
+      ind+'</update>'
+    ].join('\n');
+  }
+
+  /* DELETE — alias 미적용 */
+  const qDelete = [
+    ind+'<delete id="delete'+entity+'" parameterType="Map">',
+    ind+'    DELETE FROM '+table,
+    buildWherePk(pks, ind, 10),
+    ind+'</delete>'
+  ].join('\n');
+
+  /* ALL */
+  const banner = '    <!-- ==================== '+table+' ==================== -->';
+  const body = [
+    banner,
+    '',
+    '    <!-- 단건 조회 -->',
+    qSelectOne,
+    '',
+    '    <!-- 목록 조회 -->',
+    qSelectList,
+    '',
+    '    <!-- 등록 -->',
+    qInsert,
+    '',
+    '    <!-- 수정 -->',
+    qUpdate,
+    '',
+    '    <!-- 삭제 -->',
+    qDelete
+  ];
+
+  let qAll;
+  if (wrapMp) {
+    const nsAttr = ns ? ' namespace="'+ns+'"' : '';
+    qAll = '<mapper'+nsAttr+'>\n\n' + body.join('\n') + '\n\n</mapper>';
+  } else {
+    qAll = body.map(l => l.startsWith('    ') ? l.slice(4) : l).join('\n');
+  }
+
+  generatedSQL = {
+    'all': qAll,
+    'select-one':  stripInd(qSelectOne, ind),
+    'select-list': stripInd(qSelectList, ind),
+    'insert':      stripInd(qInsert, ind),
+    'update':      stripInd(qUpdate, ind),
+    'delete':      stripInd(qDelete, ind)
+  };
+
+  renderOutput();
+  toast('✅ 쿼리 생성 완료!');
+}
+
+function stripInd(sql, ind) {
+  if (!ind) return sql;
+  return sql.split('\n').map(l => l.startsWith(ind) ? l.slice(ind.length) : l).join('\n');
+}
+
+/* ── RENDER ── */
+function renderOutput() {
+  Object.entries(generatedSQL).forEach(([key, sql]) => {
+    const el = document.getElementById('code-'+key);
+    el.className = 'code-pre';
+    el.innerHTML = highlight(sql);
+  });
+}
+
+/* ── HIGHLIGHT ── */
+const SQL_KW = ['SELECT','FROM','WHERE','AND','OR','NOT','IN','BETWEEN','LIKE','IS','NULL',
+  'INSERT','INTO','VALUES','UPDATE','SET','DELETE','INNER','LEFT','RIGHT','JOIN','ON',
+  'GROUP BY','ORDER BY','HAVING','LIMIT','OFFSET','DISTINCT','AS','CASE','WHEN',
+  'THEN','ELSE','END','COUNT','SUM','MIN','MAX','AVG','DESC','ASC','BY'];
+
+function highlight(code) {
+  let s = esc(code);
+  s = s.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="xc">$1</span>');
+  s = s.replace(/(#\{[^}]+\})/g, '<span class="sp">$1</span>');
+  s = s.replace(/(test=&quot;)([^&"]+)(&quot;)/g, '$1<span class="si">$2</span>$3');
+  s = s.replace(/(&lt;\/?)([\w:-]+)([^&<>]*?)(\/?)(&gt;)/g, (m, open, tag, attrs, sc, close) => {
+    const ah = attrs.replace(/([\w:-]+)(\s*=\s*)(&quot;[^&]*&quot;)/g,
+      '<span class="xa">$1</span>$2<span class="xv">$3</span>');
+    return '<span class="xb">'+open+'</span><span class="xt">'+tag+'</span>'+ah+'<span class="xb">'+sc+close+'</span>';
+  });
+  const parts = s.split(/(<[^>]*>)/);
+  s = parts.map((p, i) => {
+    if (i % 2 === 1) return p; // HTML 태그는 건드리지 않음
+    SQL_KW.forEach(kw => {
+      p = p.replace(new RegExp('\\b('+kw+')\\b', 'g'), '<span class="sk">$1</span>');
+    });
+    return p;
+  }).join('');
+  return s;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── TABS ── */
+function switchTab(key, el) {
+  document.querySelectorAll('.q-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('block-'+key).classList.add('active');
+}
+
+/* ── COPY ── */
+function copyBlock(key) {
+  if (!generatedSQL[key]) { toast('⚠️ 먼저 쿼리를 생성하세요'); return; }
+  navigator.clipboard.writeText(generatedSQL[key]).then(() => toast('📋 복사됐어요!'));
+}
+function copyAll() {
+  if (!generatedSQL.all) { toast('⚠️ 먼저 쿼리를 생성하세요'); return; }
+  navigator.clipboard.writeText(generatedSQL.all).then(() => toast('📋 전체 쿼리 복사 완료!'));
+}
+
+/* ── SAMPLE ── */
+function loadSample() {
+  document.getElementById('table-name').value  = 'TB_USER';
+  document.getElementById('table-alias').value = 't';
+  document.getElementById('namespace').value   = 'com.example.mapper.UserMapper';
+  document.getElementById('columns').value     = 'USER_ID\nUSER_NAME\nEMAIL\nPHONE_NO\nSTATUS_CD\nREG_DT\nUPD_DT';
+  document.getElementById('comments').value    = '사용자 ID\n사용자 이름\n이메일\n전화번호\n상태 코드\n등록일시\n수정일시';
+  // JOIN 샘플 추가 (새 카드 형식)
+  document.getElementById('join-list').innerHTML = '';
+  addJoin();
+  const card = document.querySelector('.join-card');
+  if (card) {
+    card.querySelector('.join-table').value       = 'TB_USER_ROLE';
+    card.querySelector('.join-alias-input').value = 'r';
+    card.querySelector('.join-columns').value     = 'USER_ID\nROLE_CD\nROLE_NM';
+    card.querySelector('.join-comments').value    = '사용자 ID\n역할 코드\n역할명';
+    refreshOnSelects(); // 컬럼 설정 후 select 갱신
+    // ON 조건 직접 추가
+    const onList = card.querySelector('.on-cond-list');
+    const onItem = document.createElement('div');
+    onItem.className = 'on-cond-item';
+    onItem.dataset.left  = 'r.user_id';
+    onItem.dataset.right = 't.user_id';
+    onItem.innerHTML =
+      '<span class="on-cond-text">r.user_id = t.user_id</span>' +
+      '<button class="btn-remove" onclick="removeOnCond(this)" title="제거">✕</button>';
+    onList.appendChild(onItem);
+  }
+  // 베이스 테이블 alias "t" 기준 키
+  pkCols   = new Set(['user_id']);
+  eqCols   = new Set(['t.email', 't.phone_no']);
+  inCols   = new Set(['t.status_cd']);
+  likeCols = new Set(['t.user_name']);
+  dateCols = new Set(['t.reg_dt']);
+  renderPkChips();
+  renderAllCondChips();
+  generate();
+}
+
+/* ── TOAST ── */
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+/* ── THEME ── */
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const next = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('theme', next);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'devgen-theme-changed', theme: next === 'dark' ? '' : next }, '*');
+  }
+}
+function applyTheme(t) {
+  if (t === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('theme-btn').textContent = '☀️';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('theme-btn').textContent = '🌙';
+  }
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved) applyTheme(saved);
+})();
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'devgen-theme') applyTheme(e.data.theme);
+});
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { generate(); e.preventDefault(); }
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='c') { copyAll(); e.preventDefault(); }
+});
+</script>
+</body>
+</html>
