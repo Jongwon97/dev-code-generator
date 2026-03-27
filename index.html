@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dev Code Generator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --surface3:#2d333b;
+  --border:#30363d; --text:#cdd9e5; --muted:#768390;
+  --primary:#316dca; --primary-h:#388bfd;
+  --green:#57ab5a; --red:#f47067;
+}
+[data-theme="light"] {
+  --bg:#ffffff; --surface:#f8f9fb; --surface2:#f1f4f7; --surface3:#ffffff;
+  --border:#cdd3da; --text:#1f2328; --muted:#636d79;
+  --primary:#0969da; --primary-h:#0550ae;
+  --green:#1a7f37; --red:#cf222e;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+header {
+  flex-shrink: 0;
+  height: 46px;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  padding: 0 16px 0 20px;
+  gap: 0;
+}
+
+.site-title {
+  display: flex;
+  align-items: center;
+  font-size: .95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text);
+  margin-right: 20px;
+  gap: 6px;
+}
+.site-title .icon { font-size: 1.1rem; }
+.site-title .accent { color: var(--primary-h); }
+
+/* ── TABS ── */
+.tab-nav {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  gap: 2px;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: .86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .13s, border-color .13s;
+  white-space: nowrap;
+  outline: none;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--text);
+  border-bottom-color: var(--primary-h);
+}
+.tab-btn .tab-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: .04em;
+}
+.badge-mybatis {
+  background: rgba(244,112,103,.15);
+  color: var(--red);
+  border: 1px solid rgba(244,112,103,.3);
+}
+.badge-spring {
+  background: rgba(87,171,90,.15);
+  color: var(--green);
+  border: 1px solid rgba(87,171,90,.3);
+}
+
+.hdr-sep {
+  width: 1px;
+  background: var(--border);
+  margin: 10px 12px;
+  flex-shrink: 0;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btn-theme {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  width: 30px;
+  height: 26px;
+  font-size: .95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .13s;
+  flex-shrink: 0;
+}
+.btn-theme:hover { background: var(--surface3); }
+
+/* ── CONTENT ── */
+.tab-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-pane {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+}
+
+.tab-pane iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: var(--bg);
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="site-title">
+    <span class="icon">⚙️</span>
+    <span><span class="accent">Dev</span> Code Generator</span>
+  </div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" id="tab-mybatis" onclick="switchTab('mybatis', this)">
+      🗂️ MyBatis Generator
+      <span class="tab-badge badge-mybatis">XML</span>
+    </button>
+    <button class="tab-btn" id="tab-spring" onclick="switchTab('spring', this)">
+      🌱 Spring Generator
+      <span class="tab-badge badge-spring">Java</span>
+    </button>
+  </nav>
+
+  <div class="hdr-sep"></div>
+
+  <div class="hdr-right">
+    <button class="btn-theme" id="theme-btn" onclick="toggleTheme()" title="테마 전환">🌙</button>
+  </div>
+</header>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="pane-mybatis">
+    <iframe src="mybatis-generator.html" id="frame-mybatis" title="MyBatis CRUD Generator"></iframe>
+  </div>
+  <div class="tab-pane" id="pane-spring">
+    <iframe src="spring-generator.html" id="frame-spring" title="Spring Backend Generator" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'devgen-theme';
+let currentTheme = localStorage.getItem(STORAGE_KEY) || '';
+
+// Apply initial theme
+applyTheme(currentTheme);
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = theme === 'light' ? '☀️' : '🌙';
+  localStorage.setItem(STORAGE_KEY, theme);
+  broadcastTheme(theme);
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'light' ? '' : 'light');
+}
+
+function broadcastTheme(theme) {
+  const msg = { type: 'devgen-theme', theme };
+  ['frame-mybatis', 'frame-spring'].forEach(id => {
+    const f = document.getElementById(id);
+    if (f && f.contentWindow) {
+      try { f.contentWindow.postMessage(msg, '*'); } catch (e) {}
+    }
+  });
+}
+
+// Listen for theme changes initiated inside an iframe
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'devgen-theme-changed') {
+    const newTheme = e.data.theme;
+    if (newTheme !== currentTheme) {
+      currentTheme = newTheme;
+      document.documentElement.setAttribute('data-theme', newTheme);
+      document.getElementById('theme-btn').textContent = newTheme === 'light' ? '☀️' : '🌙';
+      localStorage.setItem(STORAGE_KEY, newTheme);
+      // sync to other iframes
+      ['frame-mybatis', 'frame-spring'].forEach(id => {
+        const f = document.getElementById(id);
+        if (f && f.contentWindow && f.contentWindow !== e.source) {
+          try { f.contentWindow.postMessage({ type: 'devgen-theme', theme: newTheme }, '*'); } catch (err) {}
+        }
+      });
+    }
+  }
+});
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pane-' + name).classList.add('active');
+}
+
+// When iframes load, push current theme
+document.querySelectorAll('iframe').forEach(f => {
+  f.addEventListener('load', () => {
+    try { f.contentWindow.postMessage({ type: 'devgen-theme', theme: currentTheme }, '*'); } catch (e) {}
+  });
+});
+</script>
+</body>
+</html>
