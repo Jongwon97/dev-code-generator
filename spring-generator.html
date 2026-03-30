@@ -211,12 +211,8 @@ input::placeholder { color:var(--muted); }
             </div>
             <div style="padding-left:22px;display:flex;flex-direction:column;gap:4px;">
               <div class="opt-row">
-                <input type="checkbox" id="opt-dup-check-insert-one" checked onchange="onInputChange()" />
-                <label for="opt-dup-check-insert-one">중복 체크 (insert)</label>
-              </div>
-              <div class="opt-row">
-                <input type="checkbox" id="opt-dup-check-update-one" checked onchange="onInputChange()" />
-                <label for="opt-dup-check-update-one">중복 체크 (update)</label>
+                <input type="checkbox" id="opt-dup-check-one" checked onchange="onInputChange()" />
+                <label for="opt-dup-check-one">중복 체크</label>
               </div>
             </div>
             <div class="opt-row">
@@ -226,12 +222,8 @@ input::placeholder { color:var(--muted); }
             </div>
             <div style="padding-left:22px;display:flex;flex-direction:column;gap:4px;">
               <div class="opt-row">
-                <input type="checkbox" id="opt-dup-check-insert" checked onchange="onInputChange()" />
-                <label for="opt-dup-check-insert">중복 체크 (insert)</label>
-              </div>
-              <div class="opt-row">
-                <input type="checkbox" id="opt-dup-check-update" checked onchange="onInputChange()" />
-                <label for="opt-dup-check-update">중복 체크 (update)</label>
+                <input type="checkbox" id="opt-dup-check-list" checked onchange="onInputChange()" />
+                <label for="opt-dup-check-list">중복 체크</label>
               </div>
             </div>
             <hr class="option-divider" />
@@ -414,10 +406,8 @@ function getCfg() {
     mSave     : document.getElementById('opt-save').checked,
     mDeleteOne: document.getElementById('opt-delete-one').checked,
     mDelete   : document.getElementById('opt-delete').checked,
-    optDupCheckInsertOne: document.getElementById('opt-dup-check-insert-one').checked,
-    optDupCheckUpdateOne: document.getElementById('opt-dup-check-update-one').checked,
-    optDupCheckInsert: document.getElementById('opt-dup-check-insert').checked,
-    optDupCheckUpdate: document.getElementById('opt-dup-check-update').checked,
+    optDupCheckOne: document.getElementById('opt-dup-check-one').checked,
+    optDupCheckList:   document.getElementById('opt-dup-check-list').checked,
     optUuid    : document.getElementById('opt-uuid').checked,
     optSeq     : document.getElementById('opt-seq').checked,
   };
@@ -467,7 +457,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 조회한다.', 'the map', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${mapOf()} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${mapOf()} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -477,7 +467,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 조회한다.', 'the list', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${listMap()} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${listMap()} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -487,7 +477,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 저장한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -497,7 +487,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 저장한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -507,7 +497,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 삭제한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -517,7 +507,7 @@ function buildController(c) {
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 삭제한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
-    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${A('@ResponseBody')} ${T('ResultMap')} ${M(mn)}(${A('@RequestBody')} ${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${svcInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -532,8 +522,8 @@ function buildController(c) {
 function buildService(c) {
   const { basePkg, modName, featureKo, author, date, className, instanceName, pkField, seqCol, seqCode,
           mFindList, mFindOne, mSaveOne, mSave, mDeleteOne, mDelete,
-          optDupCheckInsertOne, optDupCheckUpdateOne,
-          optDupCheckInsert, optDupCheckUpdate, optUuid, optSeq } = c;
+          optDupCheckOne,
+          optDupCheckList, optUuid, optSeq } = c;
   const repoClass = className + 'Repository';
   const repoInst  = instanceName + 'Repository';
   const needResultMap = mSaveOne || mSave || mDeleteOne || mDelete;
@@ -551,6 +541,8 @@ function buildService(c) {
   lines.push(`${K('import')} smartsuite.app.common.shared.service.SharedService;`);
   lines.push('');
   lines.push(`${K('import')} javax.inject.Inject;`);
+  if (mSave)
+    lines.push(`${K('import')} java.util.ArrayList;`);
   lines.push(`${K('import')} java.util.List;`);
   lines.push(`${K('import')} java.util.Map;`);
   if (needUuid)
@@ -570,7 +562,7 @@ function buildService(c) {
     const mn = 'find' + className;
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 조회한다.', 'the map', author, date, mn));
-    lines.push(`    ${K('public')} ${mapOf()} ${M(mn)}(${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${mapOf()} ${M(mn)}(${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${repoInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
@@ -579,81 +571,64 @@ function buildService(c) {
     const mn = 'find' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 조회한다.', 'the list', author, date, mn));
-    lines.push(`    ${K('public')} ${listMap()} ${M(mn)}(${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${listMap()} ${M(mn)}(${mapOf()} param) {`);
     lines.push(`        ${K('return')} ${repoInst}.${M(mn)}(param);`);
     lines.push(`    }`);
   }
 
   if (mSaveOne) {
     const mn = 'save' + className;
+    const privateMn = 'insertOrUpdate' + className;
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 저장한다.', 'ResultMap', author, date, mn));
-    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
-    lines.push(`        ${K('if')} (param.${M('get')}(${S(pkField)}) == ${K('null')}) {`);
-    if (optDupCheckInsertOne) {
-      lines.push(`            ${K('if')}(${repoInst}.${M('hasDuplicate' + className)}(param) > 0) {`);
-      lines.push(`                ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
-      lines.push(`            }`);
+    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param) {`);
+    if (optDupCheckOne) {
+      lines.push(`        ${C('// Step 1: Duplicate Check')}`);
+      lines.push(`        ${K('if')}(${repoInst}.${M('hasDuplicate' + className)}(param) > 0) {`);
+      lines.push(`            ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
+      lines.push(`        }`);
+      lines.push('');
+      lines.push(`        ${C('// Step 2: Insert or Update')}`);
+      lines.push(`        ${K('this')}.${M(privateMn)}(param);`);
+    } else {
+      lines.push(`        ${C('// Step 1: Insert or Update')}`);
+      lines.push(`        ${K('this')}.${M(privateMn)}(param);`);
     }
-    if (optUuid)
-      lines.push(`            param.${M('put')}(${S(pkField)}, ${T('UUID')}.${M('randomUUID')}().${M('toString')}());`);
-    if (optSeq && seqCol && seqCode)
-      lines.push(`            param.${M('put')}(${S(seqCol)}, sharedService.${M('generateDocumentNumber')}(${S(seqCode)}));`);
-    lines.push(`            ${repoInst}.${M('insert' + className)}(param);`);
-    lines.push(`        } ${K('else')} {`);
-    if (optDupCheckUpdateOne) {
-      lines.push(`            ${K('if')}(${repoInst}.${M('hasDuplicate' + className)}(param) > 0) {`);
-      lines.push(`                ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
-      lines.push(`            }`);
-    }
-    lines.push(`            ${repoInst}.${M('update' + className)}(param);`);
-    lines.push(`        }`);
     lines.push(`        ${K('return')} ${T('ResultMap')}.${M('SUCCESS')}();`);
     lines.push(`    }`);
   }
 
   if (mSave) {
     const mn = 'save' + className + 'List';
+    const privateMn = 'insertOrUpdate' + className;
+    const hasDupCheck = optDupCheckList;
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 저장한다.', 'ResultMap', author, date, mn));
-    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
-    // insert
-    lines.push(`        ${C('// Step 1: Insert')}`);
-    lines.push(`        ${listMapOf()} insertItems = (${listMapOf()}) param.${M('get')}(${S('insertItems')});`);
-    lines.push(`        ${K('if')}(insertItems != ${K('null')} ) {`);
-    lines.push(`            ${K('for')}(${mapOf()} insertItem : insertItems) {`);
-    if (optDupCheckInsert) {
-      lines.push(`                ${K('if')}(${repoInst}.${M('hasDuplicate' + className)}(insertItem) > 0) {`);
-      lines.push(`                    ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
-      lines.push(`                } ${K('else')} {`);
-      if (optUuid)
-        lines.push(`                    insertItem.${M('put')}(${S(pkField)}, ${T('UUID')}.${M('randomUUID')}().${M('toString')}());`);
-      if (optSeq && seqCol && seqCode)
-        lines.push(`                    insertItem.${M('put')}(${S(seqCol)}, sharedService.${M('generateDocumentNumber')}(${S(seqCode)}));`);
-      lines.push(`                    ${repoInst}.${M('insert' + className)}(insertItem);`);
-      lines.push(`                }`);
+    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param) {`);
+    lines.push(`        ${C('// Step 1: Merge items')}`);
+    lines.push(`        ${T('List')}<${mapOf()}> allItems = ${K('new')} ${T('ArrayList')}<>();`);
+    lines.push(`        allItems.${M('addAll')}((${T('List')}<${mapOf()}>) param.${M('getOrDefault')}(${S('insertItems')}, ${K('new')} ${T('ArrayList')}<>()));`);
+    lines.push(`        allItems.${M('addAll')}((${T('List')}<${mapOf()}>) param.${M('getOrDefault')}(${S('updateItems')}, ${K('new')} ${T('ArrayList')}<>()));`);
+    if (hasDupCheck) {
+      lines.push('');
+      lines.push(`        ${C('// Step 2: Duplicate Check')}`);
+      lines.push(`        ${K('for')} (${mapOf()} item : allItems) {`);
+      lines.push(`            ${K('if')} (${repoInst}.${M('hasDuplicate' + className)}(item) > 0) {`);
+      lines.push(`                ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
+      lines.push(`            }`);
+      lines.push(`        }`);
+      lines.push('');
+      lines.push(`        ${C('// Step 3: Insert or Update')}`);
+      lines.push(`        ${K('for')} (${mapOf()} item : allItems) {`);
+      lines.push(`            ${M(privateMn)}(item);`);
+      lines.push(`        }`);
     } else {
-      if (optUuid)
-        lines.push(`                insertItem.${M('put')}(${S(pkField)}, ${T('UUID')}.${M('randomUUID')}().${M('toString')}());`);
-      if (optSeq && seqCol && seqCode)
-        lines.push(`                insertItem.${M('put')}(${S(seqCol)}, sharedService.${M('generateDocumentNumber')}(${S(seqCode)}));`);
-      lines.push(`                ${repoInst}.${M('insert' + className)}(insertItem);`);
+      lines.push('');
+      lines.push(`        ${C('// Step 2: Insert or Update')}`);
+      lines.push(`        ${K('for')} (${mapOf()} item : allItems) {`);
+      lines.push(`            ${M(privateMn)}(item);`);
+      lines.push(`        }`);
     }
-    lines.push(`            }`);
-    lines.push(`        }`);
-    // update
-    lines.push(`        ${C('// Step 2: Update')}`);
-    lines.push(`        ${listMapOf()} updateItems = (${listMapOf()}) param.${M('get')}(${S('updateItems')});`);
-    lines.push(`        ${K('if')}(updateItems != ${K('null')} ) {`);
-    lines.push(`            ${K('for')}(${mapOf()} updateItem : updateItems) {`);
-    if (optDupCheckUpdate) {
-      lines.push(`                ${K('if')}(${repoInst}.${M('hasDuplicate' + className)}(updateItem) > 0) {`);
-      lines.push(`                    ${K('return')} ${T('ResultMap')}.${M('DUPLICATED')}();`);
-      lines.push(`                }`);
-    }
-    lines.push(`                ${repoInst}.${M('update' + className)}(updateItem);`);
-    lines.push(`            }`);
-    lines.push(`        }`);
     lines.push(`        ${K('return')} ${T('ResultMap')}.${M('SUCCESS')}();`);
     lines.push(`    }`);
   }
@@ -662,7 +637,7 @@ function buildService(c) {
     const mn = 'delete' + className;
     lines.push('');
     lines.push(javadoc('    ', featureKo + er + ' 삭제한다.', 'ResultMap', author, date, mn));
-    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param) {`);
     lines.push(`        ${repoInst}.${M('delete' + className)}(param);`);
     lines.push(`        ${K('return')} ${T('ResultMap')}.${M('SUCCESS')}();`);
     lines.push(`    }`);
@@ -672,7 +647,7 @@ function buildService(c) {
     const mn = 'delete' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 삭제한다.', 'ResultMap', author, date, mn));
-    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
+    lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param) {`);
     lines.push(`        ${listMapOf()} deleteItems = (${listMapOf()}) param.${M('get')}(${S('deleteItems')});`);
     lines.push(`        ${K('if')}(deleteItems != ${K('null')} ) {`);
     lines.push(`            ${K('for')}(${mapOf()} deleteItem : deleteItems) {`);
@@ -680,6 +655,22 @@ function buildService(c) {
     lines.push(`            }`);
     lines.push(`        }`);
     lines.push(`        ${K('return')} ${T('ResultMap')}.${M('SUCCESS')}();`);
+    lines.push(`    }`);
+  }
+
+  if (mSaveOne || mSave) {
+    const privateMn = 'insertOrUpdate' + className;
+    lines.push('');
+    lines.push(`    ${K('private')} ${K('void')} ${M(privateMn)}(${mapOf()} param) {`);
+    lines.push(`        ${K('if')} (param.${M('get')}(${S(pkField)}) == ${K('null')}) {`);
+    if (optUuid)
+      lines.push(`            param.${M('put')}(${S(pkField)}, ${T('UUID')}.${M('randomUUID')}().${M('toString')}());`);
+    if (optSeq && seqCol && seqCode)
+      lines.push(`            param.${M('put')}(${S(seqCol)}, sharedService.${M('generateDocumentNumber')}(${S(seqCode)}));`);
+    lines.push(`            ${repoInst}.${M('insert' + className)}(param);`);
+    lines.push(`        } ${K('else')} {`);
+    lines.push(`            ${repoInst}.${M('update' + className)}(param);`);
+    lines.push(`        }`);
     lines.push(`    }`);
   }
 
@@ -692,9 +683,9 @@ function buildService(c) {
 ───────────────────────────────────────────── */
 function buildRepository(c) {
   const { basePkg, modName, ns, className, mFindList, mFindOne, mSaveOne, mSave, mDeleteOne, mDelete,
-          optDupCheckInsertOne, optDupCheckUpdateOne, optDupCheckInsert, optDupCheckUpdate } = c;
+          optDupCheckOne, optDupCheckList } = c;
   const needInsert = mSave || mSaveOne;
-  const needDupCheck = optDupCheckInsertOne || optDupCheckUpdateOne || optDupCheckInsert || optDupCheckUpdate;
+  const needDupCheck = optDupCheckOne || optDupCheckList;
   const lines = [];
 
   lines.push(`${K('package')} ${P(basePkg + '.' + modName + '.repository')};`);
@@ -897,10 +888,8 @@ function loadSample() {
   document.getElementById('opt-save').checked      = true;
   document.getElementById('opt-delete-one').checked = true;
   document.getElementById('opt-delete').checked    = true;
-  document.getElementById('opt-dup-check-insert-one').checked = true;
-  document.getElementById('opt-dup-check-update-one').checked = true;
-  document.getElementById('opt-dup-check-insert').checked = true;
-  document.getElementById('opt-dup-check-update').checked = true;
+  document.getElementById('opt-dup-check-one').checked = true;
+  document.getElementById('opt-dup-check-list').checked  = true;
   document.getElementById('opt-uuid').checked      = true;
   document.getElementById('opt-seq').checked       = true;
   document.getElementById('seq-col').value         = 'sam_mod_cd';
