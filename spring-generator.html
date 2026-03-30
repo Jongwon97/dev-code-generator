@@ -661,6 +661,8 @@ function buildService(c) {
   if (mSaveOne || mSave) {
     const privateMn = 'insertOrUpdate' + className;
     lines.push('');
+    lines.push(`    ${C('// ============== Helper Methods ==============')}`);
+    lines.push('');
     lines.push(`    ${K('private')} ${K('void')} ${M(privateMn)}(${mapOf()} param) {`);
     lines.push(`        ${K('if')} (param.${M('get')}(${S(pkField)}) == ${K('null')}) {`);
     if (optUuid)
