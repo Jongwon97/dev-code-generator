@@ -473,7 +473,7 @@ function buildController(c) {
   }
 
   if (mFindList) {
-    const mn = 'findList' + className;
+    const mn = 'find' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 조회한다.', 'the list', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
@@ -493,7 +493,7 @@ function buildController(c) {
   }
 
   if (mSave) {
-    const mn = 'saveList' + className;
+    const mn = 'save' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 저장한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
@@ -513,7 +513,7 @@ function buildController(c) {
   }
 
   if (mDelete) {
-    const mn = 'deleteList' + className;
+    const mn = 'delete' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 삭제한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${A('@RequestMapping')}(${K('value')}=${S(mn + '.do')})`);
@@ -576,7 +576,7 @@ function buildService(c) {
   }
 
   if (mFindList) {
-    const mn = 'findList' + className;
+    const mn = 'find' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 조회한다.', 'the list', author, date, mn));
     lines.push(`    ${K('public')} ${listMap()} ${M(mn)}(${mapOf()} param){`);
@@ -613,7 +613,7 @@ function buildService(c) {
   }
 
   if (mSave) {
-    const mn = 'saveList' + className;
+    const mn = 'save' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 저장한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
@@ -669,7 +669,7 @@ function buildService(c) {
   }
 
   if (mDelete) {
-    const mn = 'deleteList' + className;
+    const mn = 'delete' + className + 'List';
     lines.push('');
     lines.push(javadoc('    ', featureKo + ' 리스트를 삭제한다.', 'ResultMap', author, date, mn));
     lines.push(`    ${K('public')} ${T('ResultMap')} ${M(mn)}(${mapOf()} param){`);
@@ -724,7 +724,7 @@ function buildRepository(c) {
     lines.push(`    }`);
   }
   if (mFindList) {
-    const mn = 'findList' + className;
+    const mn = 'find' + className + 'List';
     lines.push('');
     lines.push(`    ${K('public')} ${listMap()} ${M(mn)}(${mapOf()} param) {`);
     lines.push(`        ${K('return')} sqlSession.${M('selectList')}(NAMESPACE + ${S(mn)}, param);`);
