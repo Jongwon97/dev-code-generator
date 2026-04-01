@@ -105,6 +105,11 @@ header {
   color: var(--green);
   border: 1px solid rgba(87,171,90,.3);
 }
+.badge-scgrid {
+  background: rgba(56,189,248,.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56,189,248,.3);
+}
 
 .hdr-sep {
   width: 1px;
@@ -183,6 +188,10 @@ header {
       🌱 Spring Generator
       <span class="tab-badge badge-spring">Java</span>
     </button>
+    <button class="tab-btn" id="tab-scgrid" onclick="switchTab('scgrid', this)">
+      🗃️ Frontend Generator
+      <span class="tab-badge badge-scgrid">Frontend</span>
+    </button>
   </nav>
 
   <div class="hdr-sep"></div>
@@ -198,6 +207,9 @@ header {
   </div>
   <div class="tab-pane" id="pane-spring">
     <iframe src="spring-generator.html" id="frame-spring" title="Spring Backend Generator" loading="lazy"></iframe>
+  </div>
+  <div class="tab-pane" id="pane-scgrid">
+    <iframe src="frontend-generator.html" id="frame-scgrid" title="Frontend Generator" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -222,7 +234,7 @@ function toggleTheme() {
 
 function broadcastTheme(theme) {
   const msg = { type: 'devgen-theme', theme };
-  ['frame-mybatis', 'frame-spring'].forEach(id => {
+  ['frame-mybatis', 'frame-spring', 'frame-scgrid'].forEach(id => {
     const f = document.getElementById(id);
     if (f && f.contentWindow) {
       try { f.contentWindow.postMessage(msg, '*'); } catch (e) {}
@@ -240,7 +252,7 @@ window.addEventListener('message', e => {
       document.getElementById('theme-btn').textContent = newTheme === 'light' ? '☀️' : '🌙';
       localStorage.setItem(STORAGE_KEY, newTheme);
       // sync to other iframes
-      ['frame-mybatis', 'frame-spring'].forEach(id => {
+      ['frame-mybatis', 'frame-spring', 'frame-scgrid'].forEach(id => {
         const f = document.getElementById(id);
         if (f && f.contentWindow && f.contentWindow !== e.source) {
           try { f.contentWindow.postMessage({ type: 'devgen-theme', theme: newTheme }, '*'); } catch (err) {}
