@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontend Generator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --surface3:#2d333b;
+  --border:#30363d; --text:#cdd9e5; --muted:#768390;
+  --primary:#316dca; --primary-h:#388bfd;
+  --green:#57ab5a; --red:#f47067; --yellow:#e3b341; --teal:#38bdf8;
+  --xml-tag:#f47067; --xml-attr:#6cb6ff; --xml-val:#96d0ff;
+  --radius:6px;
+}
+[data-theme="light"] {
+  --bg:#ffffff; --surface:#f8f9fb; --surface2:#f1f4f7; --surface3:#ffffff;
+  --border:#cdd3da; --text:#1f2328; --muted:#636d79;
+  --primary:#0969da; --primary-h:#0550ae;
+  --green:#1a7f37; --red:#cf222e; --yellow:#9a6700; --teal:#0284c7;
+  --xml-tag:#cf222e; --xml-attr:#0969da; --xml-val:#0550ae;
+}
+body { font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:8px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+header h1 { font-size:1.1rem; font-weight:700; }
+.logo { color:var(--teal); }
+.sub  { color:var(--muted); font-weight:400; }
+.hdr-actions { margin-left:auto; }
+
+.layout { display:grid; grid-template-columns:380px 1fr; flex:1; overflow:hidden; }
+
+/* ── LEFT ── */
+.left-panel { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); background:var(--surface2); }
+.panel-hdr  { padding:7px 14px; font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.left-body  { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
+
+.section       { display:flex; flex-direction:column; gap:6px; }
+.section-label { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+.section-box   { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 12px; display:flex; flex-direction:column; gap:8px; }
+
+.field       { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:.78rem; font-weight:600; color:var(--text); }
+
+input[type=text], textarea, select {
+  background:var(--surface3); border:1px solid var(--border); border-radius:5px;
+  color:var(--text); font-family:inherit; font-size:.82rem; padding:5px 8px;
+  width:100%; transition:border-color .15s;
+}
+input:focus, textarea:focus, select:focus {
+  outline:none; border-color:var(--primary-h); box-shadow:0 0 0 2px rgba(56,139,253,.15);
+}
+input::placeholder, textarea::placeholder { color:var(--muted); }
+textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-size:.79rem; line-height:1.55; }
+
+.check-row { display:flex; align-items:center; gap:6px; }
+.check-row input[type=checkbox] { width:13px; height:13px; accent-color:var(--primary-h); cursor:pointer; flex-shrink:0; }
+.check-row label { font-size:.8rem; color:var(--text); cursor:pointer; }
+.checks-inline { display:flex; gap:14px; flex-wrap:wrap; }
+.row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+/* ── BUTTONS ── */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-weight:600; font-size:.8rem; padding:6px 12px; transition:all .13s; }
+.btn:active { transform:scale(.97); }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:var(--primary-h); }
+.btn-gen { background:linear-gradient(135deg,#0369a1,#316dca); color:#fff; font-size:.88rem; padding:9px; width:100%; }
+.btn-gen:hover { filter:brightness(1.1); }
+.btn-ghost  { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover  { background:var(--surface3); }
+.btn-copy   { background:rgba(87,171,90,.15); color:var(--green); border:1px solid rgba(87,171,90,.3); font-size:.75rem; padding:4px 10px; }
+.btn-copy:hover   { background:rgba(87,171,90,.25); }
+.btn-danger { background:rgba(244,112,103,.1); color:var(--red); border:1px solid rgba(244,112,103,.2); }
+.btn-danger:hover { background:rgba(244,112,103,.2); }
+.btn-xs     { padding:2px 8px; font-size:.72rem; }
+.btn-icon   { padding:2px 6px; font-size:.75rem; width:22px; height:22px; }
+
+/* ── RIGHT ── */
+.right-panel { display:flex; flex-direction:column; overflow:hidden; }
+
+.table-section { flex:0 0 52%; display:flex; flex-direction:column; overflow:hidden; border-bottom:2px solid var(--border); }
+.sec-hdr { padding:6px 12px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.sec-hdr-title { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; flex:1; }
+.table-wrap { flex:1; overflow:auto; }
+
+table.ct { width:100%; border-collapse:collapse; font-size:.77rem; white-space:nowrap; }
+table.ct th {
+  position:sticky; top:0; z-index:1;
+  background:var(--surface); border-bottom:2px solid var(--border);
+  padding:5px 6px; font-size:.66rem; font-weight:700; color:var(--muted); text-transform:uppercase; text-align:center;
+}
+table.ct td { padding:2px 3px; border-bottom:1px solid var(--border); vertical-align:middle; }
+table.ct tr:hover td { background:rgba(255,255,255,.02); }
+table.ct input[type=text] { padding:2px 5px; font-size:.77rem; }
+table.ct select          { padding:2px 3px; font-size:.77rem; }
+table.ct input[type=checkbox] { width:13px; height:13px; accent-color:var(--primary-h); cursor:pointer; display:block; margin:auto; }
+
+td.tn  { text-align:center; color:var(--muted); font-size:.68rem; width:24px; }
+td.tdl { width:24px; text-align:center; }
+td.ttag { width:185px; }
+td.thdr { min-width:80px; }
+td.tfld { min-width:85px; }
+td.tw   { width:50px; }
+td.tal  { width:82px; }
+td.tck  { width:34px; text-align:center; }
+td.tit  { min-width:120px; }
+td.tdt  { width:72px; }
+td.tft  { width:80px; }
+td.tvf  { width:90px; }
+
+.dash { color:var(--muted); display:block; text-align:center; }
+
+/* ── OUTPUT ── */
+.output-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.output-wrap    { flex:1; overflow:auto; padding:12px 16px; }
+.output-wrap pre { font-family:'Consolas','Fira Code','D2Coding',monospace; font-size:.79rem; line-height:1.7; white-space:pre; }
+.xt { color:var(--xml-tag); }
+.xa { color:var(--xml-attr); }
+.xv { color:var(--xml-val); }
+.xp { color:var(--muted); }
+
+.out-tab { padding:3px 12px; border-radius:5px; font-size:.72rem; font-weight:700; cursor:pointer; color:var(--muted); border:1px solid transparent; transition:all .13s; white-space:nowrap; }
+.out-tab:hover { color:var(--text); }
+.out-tab.active { background:var(--surface3); color:var(--text); border-color:var(--border); }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="logo">Frontend</span> <span class="sub">Generator</span></h1>
+  <div class="hdr-actions" style="display:flex;gap:8px;align-items:center">
+    <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+    <div class="panel-hdr">설정</div>
+    <div class="left-body">
+
+      <div class="section">
+        <div class="section-label">컬럼 입력 <span style="text-transform:none;font-weight:400;letter-spacing:0">(줄 구분, 순서 일치)</span></div>
+        <div class="section-box">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field">
+              <label>data-field</label>
+              <textarea id="inp-fields" rows="9"
+                placeholder="user_id&#10;user_name&#10;email&#10;phone_no&#10;status_cd&#10;reg_dt&#10;upd_dt"
+                style="height:188px"></textarea>
+            </div>
+            <div class="field">
+              <label>header-text</label>
+              <textarea id="inp-headers" rows="9"
+                placeholder="사용자 ID&#10;사용자 이름&#10;이메일&#10;전화번호&#10;상태 코드&#10;등록일시&#10;수정일시"
+                style="height:188px"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary" style="flex:1" onclick="parseInput()">⬇ 파싱</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Toolbar 버튼</div>
+        <div class="section-box">
+          <div class="checks-inline">
+            <div class="check-row"><input type="checkbox" id="tb-add"  checked><label for="tb-add">추가</label></div>
+            <div class="check-row"><input type="checkbox" id="tb-del"  checked><label for="tb-del">삭제</label></div>
+            <div class="check-row"><input type="checkbox" id="tb-save" checked><label for="tb-save">저장</label></div>
+          </div>
+          <div class="field">
+            <label style="color:var(--muted)">on-click 함수명 (추가 / 삭제 / 저장)</label>
+            <div class="row3">
+              <input type="text" id="fn-add"  value="onAdd">
+              <input type="text" id="fn-del"  value="onDelete">
+              <input type="text" id="fn-save" value="onSave">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gen" onclick="generate()">⚡ 코드 생성 (Ctrl+Enter)</button>
+
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+
+    <!-- COLUMN TABLE -->
+    <div class="table-section">
+      <div class="sec-hdr">
+        <span class="sec-hdr-title">컬럼 설정</span>
+<button class="btn btn-ghost btn-xs" onclick="addCol()">+ 추가</button>
+      </div>
+      <div class="table-wrap">
+        <table class="ct" id="col-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>삭제</th>
+              <th>태그</th>
+              <th>header-text</th>
+              <th>data-field</th>
+              <th>width</th>
+              <th>text-align</th>
+              <th>편집</th>
+              <th>필수</th>
+              <th>items (combobox)</th>
+            </tr>
+          </thead>
+          <tbody id="col-tbody">
+            <tr><td colspan="10" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼 입력 후 파싱 버튼을 클릭하세요</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-section">
+      <div class="sec-hdr">
+        <span class="sec-hdr-title">출력 결과</span>
+        <button class="btn btn-copy" onclick="copyOutput()">복사</button>
+      </div>
+      <div style="padding:5px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:2px">
+        <div class="out-tab active" onclick="switchOutTab('sc-grid',this)">sc-grid</div>
+        <div class="out-tab" onclick="switchOutTab('cond-panel',this)">cc-search-condition-panel</div>
+        <div class="out-tab" onclick="switchOutTab('script',this)">script</div>
+      </div>
+      <div class="output-wrap">
+        <div id="out-sc-grid">
+          <pre id="output" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
+        </div>
+        <div id="out-cond-panel" style="display:none">
+          <pre style="color:var(--muted);font-style:italic">준비 중...</pre>
+        </div>
+        <div id="out-script" style="display:none">
+          <pre style="color:var(--muted);font-style:italic">준비 중...</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let cols = [];
+
+/* ── THEME ── */
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'devgen-theme') {
+    document.documentElement.setAttribute('data-theme', e.data.theme);
+  }
+});
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { generate(); e.preventDefault(); }
+});
+
+/* ── DATA MODEL ── */
+function mkCol(dataField = '', headerText = '', tag = 'sc-data-column') {
+  return {
+    tag, headerText, dataField,
+    width: '100', editable: true, textAlign: 'center', required: false,
+    items: '',
+  };
+}
+
+/* ── PARSE INPUT ── */
+function parseInput() {
+  const fields  = document.getElementById('inp-fields').value.trim();
+  const headers = document.getElementById('inp-headers').value.trim();
+  if (!fields) return;
+  const fLines = fields.split('\n').map(l => l.trim()).filter(Boolean);
+  const hLines = headers.split('\n').map(l => l.trim());
+  cols = fLines.map((f, i) => mkCol(f, hLines[i] ?? ''));
+  renderTable();
+}
+
+function clearCols() { cols = []; renderTable(); }
+
+function addCol() {
+  cols.push(mkCol());
+  renderTable();
+  document.querySelector('.table-wrap').scrollTop = 9999;
+}
+
+function deleteCol(i) { cols.splice(i, 1); renderTable(); }
+
+function upd(i, key, val)  { cols[i][key] = val; }
+function updTag(i, val)    { cols[i].tag = val; renderTable(); }
+function updBool(i, key, v){ cols[i][key] = v; }
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const tbody = document.getElementById('col-tbody');
+  if (!cols.length) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼을 추가하거나 파싱하세요</td></tr>';
+    return;
+  }
+  const TAGS = [
+    ['sc-data-column',    'sc-data-column'],
+    ['sc-combobox-column','sc-combobox-column'],
+    ['sc-date-column',    'sc-date-column'],
+    ['sc-data-field',     'sc-data-field (숨김)'],
+  ];
+  const ALIGNS = ['center','left','right'];
+
+  tbody.innerHTML = cols.map((c, i) => {
+    const isCombo = c.tag === 'sc-combobox-column';
+    const isDate  = c.tag === 'sc-date-column';
+    const isField = c.tag === 'sc-data-field';
+
+    const tagSel = `<select onchange="updTag(${i},this.value)">${
+      TAGS.map(([v,l]) => `<option value="${v}"${c.tag===v?' selected':''}>${l}</option>`).join('')
+    }</select>`;
+
+    const hdrInp = isField ? '<span class="dash">—</span>'
+      : `<input type="text" value="${xe(c.headerText)}" oninput="upd(${i},'headerText',this.value)">`;
+
+    const fldInp = `<input type="text" value="${xe(c.dataField)}" oninput="upd(${i},'dataField',this.value)">`;
+
+    const widInp = isField ? '<span class="dash">—</span>'
+      : `<input type="text" value="${xe(c.width)}" oninput="upd(${i},'width',this.value)" style="width:44px">`;
+
+    const alSel = (isField || isDate) ? '<span class="dash">—</span>'
+      : `<select onchange="upd(${i},'textAlign',this.value)" style="width:76px">${
+          ALIGNS.map(v=>`<option${c.textAlign===v?' selected':''}>${v}</option>`).join('')
+        }</select>`;
+
+    const edChk = isField ? '<span class="dash">—</span>'
+      : `<input type="checkbox"${c.editable?' checked':''} onchange="updBool(${i},'editable',this.checked)">`;
+
+    const rqChk = isField ? '<span class="dash">—</span>'
+      : `<input type="checkbox"${c.required?' checked':''} onchange="updBool(${i},'required',this.checked)">`;
+
+    const itsInp = isCombo
+      ? `<input type="text" value="${xe(c.items)}" placeholder="A001" oninput="upd(${i},'items',this.value)">`
+      : '<span class="dash">—</span>';
+
+    return `<tr>
+      <td class="tn">${i+1}</td>
+      <td class="tdl"><button class="btn btn-danger btn-icon" onclick="deleteCol(${i})">×</button></td>
+      <td class="ttag">${tagSel}</td>
+      <td class="thdr">${hdrInp}</td>
+      <td class="tfld">${fldInp}</td>
+      <td class="tw">${widInp}</td>
+      <td class="tal">${alSel}</td>
+      <td class="tck">${edChk}</td>
+      <td class="tck">${rqChk}</td>
+      <td class="tit">${itsInp}</td>
+    </tr>`;
+  }).join('');
+}
+
+function xe(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── GENERATE ── */
+function generate() {
+  if (!cols.length) { alert('컬럼을 먼저 입력하세요.'); return; }
+
+  const gridId   = 'gridPanel';
+  const provider = '{{resultList}}';
+  const showAdd  = document.getElementById('tb-add').checked;
+  const showDel  = document.getElementById('tb-del').checked;
+  const showSave = document.getElementById('tb-save').checked;
+  const fnAdd    = document.getElementById('fn-add').value.trim()  || 'onAdd';
+  const fnDel    = document.getElementById('fn-del').value.trim()  || 'onDelete';
+  const fnSave   = document.getElementById('fn-save').value.trim() || 'onSave';
+
+  const displayCols = cols.filter(c => c.tag !== 'sc-data-field');
+  const hiddenCols  = cols.filter(c => c.tag === 'sc-data-field');
+
+  // ── alignment ──
+  const tagW = displayCols.length
+    ? Math.max(...displayCols.map(c => c.tag.length))
+    : 14;
+
+  const attrMaxW = {};
+  displayCols.forEach(col => {
+    buildAttrs(col).forEach(([k, v]) => {
+      const w = dw(`${k}="${v}"`);
+      if (!attrMaxW[k] || w > attrMaxW[k]) attrMaxW[k] = w;
+    });
+  });
+
+  const I12 = '    '; // 4-space indent
+  const I16 = '        '; // 8-space indent
+
+  const colLines = displayCols.map(col => {
+    const attrs = buildAttrs(col);
+    const tag   = col.tag.padEnd(tagW);
+    const attrStr = attrs.map(([k, v], j) => {
+      const s = `${k}="${v}"`;
+      return j < attrs.length - 1 ? pw(s, attrMaxW[k]) : s;
+    }).join(' ');
+
+    if (col.tag === 'sc-combobox-column') {
+      const contIndent = ' '.repeat(I16.length + 1 + tagW + 1);
+      const rawItems = (col.items || 'A001').trim();
+      const itemsVal = rawItems.startsWith('{{') ? rawItems
+        : rawItems.startsWith('codes.') ? `{{${rawItems}}}`
+        : `{{codes.${rawItems}}}`;
+      const comboLine = contIndent + `items="${itemsVal}" display-field="label" value-field="data"`;
+      return `${I16}<${tag} ${attrStr}\n${comboLine}></${col.tag}>`;
+    }
+
+    return `${I16}<${tag} ${attrStr}></${col.tag}>`;
+  });
+
+  // ── toolbar ──
+  let toolbarBlock = '';
+  if (showAdd || showDel || showSave) {
+    const active = [];
+    if (showAdd)  active.push([fnAdd,  '추가']);
+    if (showDel)  active.push([fnDel,  '삭제']);
+    if (showSave) active.push([fnSave, '저장']);
+    const maxFnW = Math.max(...active.map(([fn]) => fn.length));
+    const btns = active.map(([fn, txt]) =>
+      `${I16}<sc-button text="${txt}" on-click="${fn.padEnd(maxFnW)}" auth-s></sc-button>`
+    );
+    toolbarBlock = `${I12}<cc-grid-toolbar>\n${btns.join('\n')}\n${I12}</cc-grid-toolbar>`;
+  }
+
+  // ── hidden fields ──
+  const allHidden = [
+    ...hiddenCols.map(c => c.dataField).filter(Boolean),
+  ];
+  let fieldsBlock = '';
+  if (allHidden.length) {
+    const fl = allHidden.map(f => `${I16}<sc-data-field data-field="${f}"></sc-data-field>`).join('\n');
+    fieldsBlock = `${I12}<sc-grid-fields>\n${fl}\n${I12}</sc-grid-fields>`;
+  }
+
+  const parts = [
+    `<sc-grid id="${gridId}"`,
+    `         data-provider="${provider}">`,
+  ];
+  if (toolbarBlock) parts.push(toolbarBlock);
+  parts.push(`${I12}<sc-grid-columns>`);
+  parts.push(...colLines);
+  parts.push(`${I12}</sc-grid-columns>`);
+  if (fieldsBlock) parts.push(fieldsBlock);
+  parts.push(`</sc-grid>`);
+
+  document.getElementById('output').innerHTML = hlXml(parts.join('\n'));
+}
+
+/* ── BUILD ATTRS ── */
+function buildAttrs(col) {
+  const a = [];
+  if (col.tag === 'sc-data-field') {
+    a.push(['data-field', col.dataField]);
+    return a;
+  }
+  a.push(['header-text', col.headerText]);
+  a.push(['data-field', col.dataField]);
+  a.push(['width', col.width || '100']);
+  if (col.tag !== 'sc-date-column') {
+    a.push(['text-align', col.textAlign || 'center']);
+  }
+  if (col.editable) a.push(['editable', 'true']);
+  if (col.required) a.push(['required', 'true']);
+  if (col.tag === 'sc-date-column') {
+    a.push(['value-format', 'yyyy-MM-dd']);
+  }
+  return a;
+}
+
+/* ── DISPLAY WIDTH (Korean = 2 chars wide) ── */
+function dw(s) {
+  let w = 0;
+  for (const c of s) w += c.charCodeAt(0) > 0x7F ? 2 : 1;
+  return w;
+}
+
+function pw(s, targetW) {
+  return s + ' '.repeat(Math.max(0, targetW - dw(s)));
+}
+
+/* ── SYNTAX HIGHLIGHT ── */
+function hlXml(raw) {
+  // Tokenize raw XML first, then escape+colorize each token separately.
+  // This prevents span-inserted HTML from being re-matched by later regexes.
+  const TAG = /<(\/?)(\w[\w-]*)([^>]*)>/g;
+  const out = [];
+  let last = 0, m;
+  while ((m = TAG.exec(raw)) !== null) {
+    if (m.index > last) out.push(he(raw.slice(last, m.index)));
+    const [, slash, name, attrs] = m;
+    out.push(
+      `<span class="xp">&lt;${slash}</span><span class="xt">${he(name)}</span>` +
+      colorAttrs(attrs) +
+      `<span class="xp">&gt;</span>`
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < raw.length) out.push(he(raw.slice(last)));
+  return out.join('');
+}
+
+function he(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function colorAttrs(s) {
+  if (!s) return '';
+  return s.replace(/([\w-]+)="([^"]*)"|(\S+)/g, (_, k, v, bare) =>
+    k !== undefined
+      ? ` <span class="xa">${he(k)}</span><span class="xp">="</span><span class="xv">${he(v)}</span><span class="xp">"</span>`
+      : ` <span class="xa">${he(bare)}</span>`
+  );
+}
+
+/* ── SAMPLE ── */
+function loadSample() {
+  document.getElementById('inp-fields').value =
+    'user_id\nuser_name\nemail\nphone_no\nstatus_cd\nreg_dt\nupd_dt';
+  document.getElementById('inp-headers').value =
+    '사용자 ID\n사용자 이름\n이메일\n전화번호\n상태 코드\n등록일시\n수정일시';
+  parseInput();
+  cols.forEach(c => {
+    if (c.dataField === 'status_cd') c.tag = 'sc-combobox-column';
+    if (c.dataField === 'reg_dt' || c.dataField === 'upd_dt') c.tag = 'sc-date-column';
+  });
+  renderTable();
+  generate();
+}
+
+/* ── OUTPUT TABS ── */
+function switchOutTab(name, el) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('out-sc-grid').style.display    = name === 'sc-grid'    ? '' : 'none';
+  document.getElementById('out-cond-panel').style.display = name === 'cond-panel' ? '' : 'none';
+  document.getElementById('out-script').style.display     = name === 'script'     ? '' : 'none';
+}
+
+/* ── COPY ── */
+function copyOutput() {
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
+</script>
+</body>
+</html>
