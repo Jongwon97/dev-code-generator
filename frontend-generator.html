@@ -22,7 +22,7 @@
   --xml-tag:#cf222e; --xml-attr:#0969da; --xml-val:#0550ae;
 }
 body { font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:8px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
 header h1 { font-size:1.1rem; font-weight:700; }
 .logo { color:var(--teal); }
 .sub  { color:var(--muted); font-weight:400; }
@@ -61,7 +61,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
 
 /* ── BUTTONS ── */
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-weight:600; font-size:.8rem; padding:6px 12px; transition:all .13s; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:6px; cursor:pointer; font-family:inherit; font-weight:600; font-size:.82rem; padding:7px 14px; transition:all .13s; }
 .btn:active { transform:scale(.97); }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-primary:hover { background:var(--primary-h); }
@@ -73,7 +73,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 .btn-copy:hover   { background:rgba(87,171,90,.25); }
 .btn-danger { background:rgba(244,112,103,.1); color:var(--red); border:1px solid rgba(244,112,103,.2); }
 .btn-danger:hover { background:rgba(244,112,103,.2); }
-.btn-xs     { padding:2px 8px; font-size:.72rem; }
+.btn-xs     { padding:3px 8px; font-size:.72rem; }
 .btn-icon   { padding:2px 6px; font-size:.75rem; width:22px; height:22px; }
 
 /* ── RIGHT ── */
@@ -84,11 +84,11 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 .sec-hdr-title { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; flex:1; }
 .table-wrap { flex:1; overflow:auto; }
 
-table.ct { width:100%; border-collapse:collapse; font-size:.77rem; white-space:nowrap; }
+table.ct { width:100%; border-collapse:collapse; font-size:.77rem; white-space:nowrap; table-layout:auto; }
 table.ct th {
   position:sticky; top:0; z-index:1;
   background:var(--surface); border-bottom:2px solid var(--border);
-  padding:5px 6px; font-size:.66rem; font-weight:700; color:var(--muted); text-transform:uppercase; text-align:center;
+  padding:5px 6px; font-size:.75rem; font-weight:700; color:var(--muted); text-align:center;
 }
 table.ct td { padding:2px 3px; border-bottom:1px solid var(--border); vertical-align:middle; }
 table.ct tr:hover td { background:rgba(255,255,255,.02); }
@@ -96,15 +96,16 @@ table.ct input[type=text] { padding:2px 5px; font-size:.77rem; }
 table.ct select          { padding:2px 3px; font-size:.77rem; }
 table.ct input[type=checkbox] { width:13px; height:13px; accent-color:var(--primary-h); cursor:pointer; display:block; margin:auto; }
 
-td.tn  { text-align:center; color:var(--muted); font-size:.68rem; width:24px; }
-td.tdl { width:24px; text-align:center; }
-td.ttag { width:185px; }
+td.tn  { text-align:center; color:var(--muted); font-size:.68rem; width:16px; }
+td.tdl { width:16px; text-align:center; }
+td.ttag { width:94px; }
 td.thdr { min-width:80px; }
 td.tfld { min-width:85px; }
 td.tw   { width:50px; }
-td.tal  { width:82px; }
+td.tal  { width:40px; max-width:40px; overflow:hidden; }
+td.tal select { width:100%; max-width:100%; box-sizing:border-box; }
 td.tck  { width:34px; text-align:center; }
-td.tit  { min-width:120px; }
+td.tit  { width:50px; }
 td.tdt  { width:72px; }
 td.tft  { width:80px; }
 td.tvf  { width:90px; }
@@ -142,7 +143,7 @@ td.tvf  { width:90px; }
 
   <!-- ── LEFT PANEL ── -->
   <div class="left-panel">
-    <div class="panel-hdr">설정</div>
+    <div class="panel-hdr">입력</div>
     <div class="left-body">
 
       <div class="section">
@@ -205,16 +206,16 @@ td.tvf  { width:90px; }
         <table class="ct" id="col-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>삭제</th>
-              <th>태그</th>
-              <th>header-text</th>
-              <th>data-field</th>
-              <th>width</th>
-              <th>text-align</th>
-              <th>편집</th>
-              <th>필수</th>
-              <th>items (combobox)</th>
+              <th style="width:10px">#</th>
+              <th style="width:10px">삭제</th>
+              <th style="width:41px">tag type</th>
+              <th style="width:100px">header-text</th>
+              <th style="width:100px">data-field</th>
+              <th style="width:20px">items</th>
+              <th style="width:20px">width</th>
+              <th style="width:20px">text-align</th>
+              <th style="width:14px">editable</th>
+              <th style="width:14px">required</th>
             </tr>
           </thead>
           <tbody id="col-tbody">
@@ -268,7 +269,7 @@ document.addEventListener('keydown', e => {
 function mkCol(dataField = '', headerText = '', tag = 'sc-data-column') {
   return {
     tag, headerText, dataField,
-    width: '100', editable: true, textAlign: 'center', required: false,
+    width: '100', editable: false, textAlign: 'center', required: false,
     items: '',
   };
 }
@@ -295,7 +296,7 @@ function addCol() {
 function deleteCol(i) { cols.splice(i, 1); renderTable(); }
 
 function upd(i, key, val)  { cols[i][key] = val; }
-function updTag(i, val)    { cols[i].tag = val; renderTable(); }
+function updTag(i, val)    { cols[i].tag = val; if (val === 'sc-combobox-column') cols[i].textAlign = 'center'; renderTable(); }
 function updBool(i, key, v){ cols[i][key] = v; }
 
 /* ── RENDER TABLE ── */
@@ -328,10 +329,10 @@ function renderTable() {
     const fldInp = `<input type="text" value="${xe(c.dataField)}" oninput="upd(${i},'dataField',this.value)">`;
 
     const widInp = isField ? '<span class="dash">—</span>'
-      : `<input type="text" value="${xe(c.width)}" oninput="upd(${i},'width',this.value)" style="width:44px">`;
+      : `<input type="text" value="${xe(c.width)}" oninput="upd(${i},'width',this.value)">`;
 
-    const alSel = (isField || isDate) ? '<span class="dash">—</span>'
-      : `<select onchange="upd(${i},'textAlign',this.value)" style="width:76px">${
+    const alSel = (isField || isDate || isCombo) ? '<span class="dash">—</span>'
+      : `<select onchange="upd(${i},'textAlign',this.value)">${
           ALIGNS.map(v=>`<option${c.textAlign===v?' selected':''}>${v}</option>`).join('')
         }</select>`;
 
@@ -351,11 +352,11 @@ function renderTable() {
       <td class="ttag">${tagSel}</td>
       <td class="thdr">${hdrInp}</td>
       <td class="tfld">${fldInp}</td>
+      <td class="tit">${itsInp}</td>
       <td class="tw">${widInp}</td>
       <td class="tal">${alSel}</td>
       <td class="tck">${edChk}</td>
       <td class="tck">${rqChk}</td>
-      <td class="tit">${itsInp}</td>
     </tr>`;
   }).join('');
 }
@@ -426,7 +427,7 @@ function generate() {
     if (showSave) active.push([fnSave, '저장']);
     const maxFnW = Math.max(...active.map(([fn]) => fn.length));
     const btns = active.map(([fn, txt]) =>
-      `${I16}<sc-button text="${txt}" on-click="${fn.padEnd(maxFnW)}" auth-s></sc-button>`
+      `${I16}<sc-button text="${txt}" on-click="${fn}"${' '.repeat(maxFnW - fn.length)} auth-s></sc-button>`
     );
     toolbarBlock = `${I12}<cc-grid-toolbar>\n${btns.join('\n')}\n${I12}</cc-grid-toolbar>`;
   }
@@ -466,7 +467,7 @@ function buildAttrs(col) {
   a.push(['data-field', col.dataField]);
   a.push(['width', col.width || '100']);
   if (col.tag !== 'sc-date-column') {
-    a.push(['text-align', col.textAlign || 'center']);
+    a.push(['text-align', col.tag === 'sc-combobox-column' ? 'center' : (col.textAlign || 'center')]);
   }
   if (col.editable) a.push(['editable', 'true']);
   if (col.required) a.push(['required', 'true']);
