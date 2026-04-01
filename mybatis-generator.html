@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MyBatis CRUD Generator</title>
+<title>MyBatis Generator</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -29,7 +29,7 @@ body { font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif; background:var(-
 
 /* HEADER */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-header h1 { font-size:1.25rem; font-weight:700; }
+header h1 { font-size:1.1rem; font-weight:700; }
 .logo { color:var(--red); }
 .sub  { color:var(--muted); font-weight:400; font-size:1.05rem; }
 .hdr-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
@@ -146,7 +146,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 .btn-copy:hover { background:rgba(87,171,90,.25); }
 .btn-copy-all { background:var(--green); color:#0d1117; padding:8px 16px; }
 .btn-copy-all:hover { filter:brightness(1.1); }
-.btn-xs { padding:3px 8px; font-size:.72rem; }
+.btn-xs { padding:2px 8px; font-size:.72rem; }
 
 /* OUTPUT */
 .output-panel { display:flex; flex-direction:column; overflow:hidden; }
@@ -196,10 +196,9 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 <body>
 
 <header>
-  <h1>🗂️ <span class="logo">MyBatis</span> <span class="sub">CRUD Generator</span></h1>
+  <h1><span class="logo">MyBatis</span> <span class="sub">Generator</span></h1>
   <div class="hdr-actions">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
-    <button class="btn btn-copy-all btn-xs" onclick="copyAll()">전체 복사</button>
   </div>
 </header>
 
