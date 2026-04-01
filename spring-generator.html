@@ -66,8 +66,6 @@ input::placeholder { color:var(--muted); }
 .btn-download { background:var(--primary); color:#fff; padding:8px 16px; }
 .btn-download:hover { background:var(--primary-h); }
 .btn-xs { padding:3px 8px; font-size:.72rem; }
-.btn-theme { background:var(--surface2); color:var(--text); border:1px solid var(--border); width:32px; padding:0; height:28px; font-size:1rem; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; transition:all .15s; flex-shrink:0; }
-.btn-theme:hover { background:var(--surface3); }
 .output-panel { display:flex; flex-direction:column; overflow:hidden; }
 .output-header { padding:8px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0; flex-shrink:0; flex-wrap:wrap; }
 .output-label { background:var(--primary); color:#fff; padding:3px 10px; border-radius:4px; font-size:.72rem; font-weight:700; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -112,7 +110,6 @@ input::placeholder { color:var(--muted); }
   <div class="hdr-actions">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
     <button class="btn btn-download btn-xs" onclick="downloadZip()">⬇ ZIP 다운로드</button>
-    <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="테마 전환">🌙</button>
   </div>
 </header>
 
@@ -912,19 +909,9 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-function toggleTheme() {
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  const next = isLight ? '' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-btn').textContent = isLight ? '🌙' : '☀️';
-  if (window.parent !== window) {
-    window.parent.postMessage({ type: 'devgen-theme-changed', theme: next }, '*');
-  }
-}
 window.addEventListener('message', e => {
   if (e.data && e.data.type === 'devgen-theme') {
     document.documentElement.setAttribute('data-theme', e.data.theme);
-    document.getElementById('theme-btn').textContent = e.data.theme === 'light' ? '☀️' : '🌙';
   }
 });
 
