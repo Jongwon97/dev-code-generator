@@ -26,7 +26,7 @@
 }
 body { font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-header h1 { font-size:1.25rem; font-weight:700; }
+header h1 { font-size:1.1rem; font-weight:700; }
 .logo { color:var(--green); }
 .sub  { color:var(--muted); font-weight:400; font-size:1.05rem; }
 .hdr-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
@@ -65,7 +65,7 @@ input::placeholder { color:var(--muted); }
 .btn-copy:hover { background:rgba(87,171,90,.25); }
 .btn-download { background:var(--primary); color:#fff; padding:8px 16px; }
 .btn-download:hover { background:var(--primary-h); }
-.btn-xs { padding:3px 8px; font-size:.72rem; }
+.btn-xs { padding:2px 8px; font-size:.72rem; }
 .output-panel { display:flex; flex-direction:column; overflow:hidden; }
 .output-header { padding:8px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0; flex-shrink:0; flex-wrap:wrap; }
 .output-label { background:var(--primary); color:#fff; padding:3px 10px; border-radius:4px; font-size:.72rem; font-weight:700; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -106,7 +106,7 @@ input::placeholder { color:var(--muted); }
 <body>
 
 <header>
-  <h1>🌱 <span class="logo">Spring</span> <span class="sub">Backend Generator</span></h1>
+  <h1><span class="logo">Spring</span> <span class="sub">Backend Generator</span></h1>
   <div class="hdr-actions">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
     <button class="btn btn-download btn-xs" onclick="downloadZip()">⬇ ZIP 다운로드</button>
