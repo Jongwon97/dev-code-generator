@@ -199,6 +199,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
   <h1><span class="logo">MyBatis</span> <span class="sub">Generator</span></h1>
   <div class="hdr-actions">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
+    <button class="btn btn-ghost btn-xs" onclick="resetAll()">초기화</button>
   </div>
 </header>
 
@@ -209,10 +210,12 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
     <div class="panel-title">입력</div>
     <div class="panel-body">
 
-      <!-- Namespace: 맨위 한줄 -->
-      <div class="namespace-bar">
-        <label>Namespace</label>
-        <input type="text" id="namespace" placeholder="com.example.mapper.UserMapper" oninput="onInputChange()" />
+      <!-- 도메인: 맨위 한줄 -->
+      <div class="namespace-bar" style="flex-direction:column;align-items:flex-start;gap:5px">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <label>도메인</label>
+          <input type="text" id="inp-domain" oninput="onInputChange()" />
+        </div>
       </div>
 
       <!-- 베이스 테이블 카드 -->
@@ -222,24 +225,24 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
         <div class="row3">
           <div class="field">
             <label>테이블명</label>
-            <input type="text" id="table-name" placeholder="TB_USER" oninput="onInputChange()" />
+            <input type="text" id="table-name" oninput="onInputChange()" />
           </div>
           <div class="field">
             <label>테이블 별칭 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
-            <input type="text" id="table-alias" placeholder="t" oninput="onInputChange()" />
+            <input type="text" id="table-alias" oninput="onInputChange()" />
           </div>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
           <div class="field">
             <label>컬럼 목록 (줄 구분)</label>
             <textarea id="columns" rows="9"
-              placeholder="USER_ID&#10;USER_NAME&#10;EMAIL&#10;PHONE_NO&#10;STATUS_CD&#10;REG_DT&#10;UPD_DT"
+             
               oninput="onInputChange()" style="height:192px"></textarea>
           </div>
           <div class="field">
             <label>주석 (컬럼 순서 일치, 줄 구분)</label>
             <textarea id="comments" rows="9"
-              placeholder="사용자 ID&#10;사용자 이름&#10;이메일&#10;전화번호&#10;상태 코드&#10;등록일시&#10;수정일시"
+             
               oninput="onInputChange()" style="height:192px"></textarea>
           </div>
         </div>
@@ -263,7 +266,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
             <label style="white-space:nowrap;flex-shrink:0;">= 조건 컬럼</label>
             <div class="cond-combo on-combo">
-              <input class="on-combo-input" id="eq-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="eq" autocomplete="off"
+              <input class="on-combo-input" id="eq-combo" type="text" data-cond-type="eq" autocomplete="off"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -275,7 +278,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
             <label style="white-space:nowrap;flex-shrink:0;">IN 조건 컬럼</label>
             <div class="cond-combo on-combo">
-              <input class="on-combo-input" id="in-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="in" autocomplete="off"
+              <input class="on-combo-input" id="in-combo" type="text" data-cond-type="in" autocomplete="off"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -287,7 +290,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
             <label style="white-space:nowrap;flex-shrink:0;">LIKE 조건 컬럼</label>
             <div class="cond-combo on-combo">
-              <input class="on-combo-input" id="like-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="like" autocomplete="off"
+              <input class="on-combo-input" id="like-combo" type="text" data-cond-type="like" autocomplete="off"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -299,7 +302,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
             <label style="white-space:nowrap;flex-shrink:0;">날짜 범위 컬럼</label>
             <div class="cond-combo on-combo">
-              <input class="on-combo-input" id="date-combo" type="text" placeholder="컬럼 검색 후 선택..." data-cond-type="date" autocomplete="off"
+              <input class="on-combo-input" id="date-combo" type="text" data-cond-type="date" autocomplete="off"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -317,7 +320,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;">
             <label style="white-space:nowrap;flex-shrink:0;">PK 컬럼 선택</label>
             <div class="cond-combo on-combo">
-              <input class="on-combo-input" id="pk-combo" type="text" placeholder="컬럼 검색 후 선택..." autocomplete="off"
+              <input class="on-combo-input" id="pk-combo" type="text" autocomplete="off"
                 oninput="filterPkCombo(this)" onfocus="openPkCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -441,6 +444,25 @@ function toPascal(str) {
   const c = toCamel(str);
   return c.charAt(0).toUpperCase() + c.slice(1);
 }
+
+/* ── domain converters ── */
+function getDomain() {
+  return document.getElementById('inp-domain').value.trim();
+}
+function domainToKebab(domain) {
+  if (!domain) return '';
+  return domain
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[_\s]+/g, '-')
+    .toLowerCase();
+}
+function domainToPascal(domain) {
+  if (!domain) return '';
+  return domainToKebab(domain)
+    .split('-').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
+}
 // MyBatis 파라미터용 소문자 snake_case 변환 (USER_ID → user_id)
 function toSnake(col) { return col.trim().toLowerCase(); }
 function param(col) { return '#{p.' + toSnake(col) + '}'; }
@@ -464,8 +486,14 @@ function buildCmap(cols, cmts) {
 }
 function getTable()     { return document.getElementById('table-name').value.trim().toUpperCase(); }
 function getAlias()     { return document.getElementById('table-alias').value.trim(); }
-function getNamespace() { return document.getElementById('namespace').value.trim(); }
+function getNamespace() {
+  const domain = getDomain();
+  if (!domain) return '';
+  return domainToKebab(domain);
+}
 function getEntityName() {
+  const domain = getDomain();
+  if (domain) return domainToPascal(domain);
   const t = document.getElementById('table-name').value.trim();
   if (!t) return 'Entity';
   return t.replace(/^(TBL?_|TB_|T_)/i,'').split('_')
@@ -527,31 +555,31 @@ function addJoin() {
         <option>INNER JOIN</option>
         <option>RIGHT JOIN</option>
       </select>
-      <input type="text" class="join-table" placeholder="TB_ORDER" oninput="onInputChange()" style="flex:1" />
-      <input type="text" class="join-alias-input" placeholder="별칭" oninput="onInputChange()" />
+      <input type="text" class="join-table" oninput="onInputChange()" style="flex:1" />
+      <input type="text" class="join-alias-input" oninput="onInputChange()" />
       <button class="btn-remove" onclick="removeJoin(this)" title="제거">✕</button>
     </div>
     <div class="join-cols-grid">
       <div>
         <div class="join-sub-lbl">컬럼 목록 (줄 구분)</div>
-        <textarea class="join-columns" placeholder="ORDER_ID&#10;AMOUNT" oninput="onInputChange()" style="height:88px"></textarea>
+        <textarea class="join-columns" oninput="onInputChange()" style="height:88px"></textarea>
       </div>
       <div>
         <div class="join-sub-lbl">주석 (컬럼 순서 일치)</div>
-        <textarea class="join-comments" placeholder="주문 ID&#10;금액" oninput="onInputChange()" style="height:88px"></textarea>
+        <textarea class="join-comments" oninput="onInputChange()" style="height:88px"></textarea>
       </div>
     </div>
     <div class="on-builder">
       <div class="join-sub-lbl">ON 조건</div>
       <div class="on-builder-row">
         <div class="on-combo">
-          <input class="on-left-sel on-combo-input" type="text" placeholder="LEFT 컬럼 검색..." autocomplete="off"
+          <input class="on-left-sel on-combo-input" type="text" autocomplete="off"
             oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
           <div class="on-combo-drop"></div>
         </div>
         <span class="on-eq">=</span>
         <div class="on-combo">
-          <input class="on-right-sel on-combo-input" type="text" placeholder="RIGHT 컬럼 검색..." autocomplete="off"
+          <input class="on-right-sel on-combo-input" type="text" autocomplete="off"
             oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
           <div class="on-combo-drop"></div>
         </div>
@@ -1057,7 +1085,7 @@ function generate() {
 
   /* SELECT ONE */
   const qSelectOne = [
-    ind+'<select id="select'+entity+'" parameterType="Map" resultType="Map">',
+    ind+'<select id="find'+entity+'" parameterType="Map" resultType="Map">',
     buildSelectBlock(cols, cmap, mPfx, joins, sqlInd),
     kwPfx('FROM', sqlInd) + fromTable,
     ...(joinBlock ? [joinBlock] : []),
@@ -1099,7 +1127,7 @@ function generate() {
     return null;
   }).filter(Boolean).join('\n');
   const qSelectList = [
-    ind+'<select id="select'+entity+'List" parameterType="Map" resultType="Map">',
+    ind+'<select id="find'+entity+'List" parameterType="Map" resultType="Map">',
     buildSelectBlock(cols, cmap, mPfx, joins, sqlInd),
     kwPfx('FROM', sqlInd) + fromTable,
     ...(joinBlock ? [joinBlock] : []),
@@ -1290,11 +1318,44 @@ function copyAll() {
   navigator.clipboard.writeText(generatedSQL.all).then(() => toast('📋 전체 쿼리 복사 완료!'));
 }
 
+/* ── RESET ── */
+function resetAll() {
+  document.getElementById('inp-domain').value   = '';
+  document.getElementById('table-name').value   = '';
+  document.getElementById('table-alias').value  = '';
+  document.getElementById('columns').value      = '';
+  document.getElementById('comments').value     = '';
+  document.getElementById('join-list').innerHTML = '';
+  document.getElementById('opt-dynamic-update').checked   = true;
+  document.getElementById('opt-useGeneratedKeys').checked = false;
+  document.getElementById('opt-wrap-mapper').checked      = true;
+  pkCols   = new Set();
+  eqCols   = new Set();
+  inCols   = new Set();
+  likeCols = new Set();
+  dateCols = new Set();
+  generatedSQL = {};
+  renderPkChips();
+  renderAllCondChips();
+  refreshOnSelects();
+  const codeAll = document.getElementById('code-all');
+  codeAll.className = 'code-pre empty-msg';
+  codeAll.innerHTML = '<span class="icon">🗂️</span><span>왼쪽에 테이블명과 컬럼을 입력 후<br>⚡ 버튼을 눌러 생성하세요</span>';
+  ['select-one', 'select-list', 'insert', 'update', 'delete'].forEach(key => {
+    document.getElementById('code-' + key).innerHTML = '';
+  });
+  document.querySelectorAll('.q-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+  document.querySelector('.q-tab').classList.add('active');
+  document.getElementById('block-all').classList.add('active');
+  toast('입력이 초기화되었습니다');
+}
+
 /* ── SAMPLE ── */
 function loadSample() {
   document.getElementById('table-name').value  = 'TB_USER';
   document.getElementById('table-alias').value = 't';
-  document.getElementById('namespace').value   = 'com.example.mapper.UserMapper';
+  document.getElementById('inp-domain').value  = 'user';
   document.getElementById('columns').value     = 'USER_ID\nUSER_NAME\nEMAIL\nPHONE_NO\nSTATUS_CD\nREG_DT\nUPD_DT';
   document.getElementById('comments').value    = '사용자 ID\n사용자 이름\n이메일\n전화번호\n상태 코드\n등록일시\n수정일시';
   // JOIN 샘플 추가 (새 카드 형식)
