@@ -136,6 +136,7 @@ td.tvf  { width:90px; }
   <h1><span class="logo">Frontend</span> <span class="sub">Generator</span></h1>
   <div class="hdr-actions" style="display:flex;gap:8px;align-items:center">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
+    <button class="btn btn-ghost btn-xs" onclick="resetAll()">초기화</button>
   </div>
 </header>
 
@@ -151,7 +152,7 @@ td.tvf  { width:90px; }
         <div class="section-box">
           <div class="field">
             <label>Module Name</label>
-            <input type="text" id="inp-module" placeholder="name">
+            <input type="text" id="inp-module">
           </div>
         </div>
       </div>
@@ -163,13 +164,13 @@ td.tvf  { width:90px; }
             <div class="field">
               <label>data-field</label>
               <textarea id="inp-fields" rows="9"
-                placeholder="user_id&#10;user_name&#10;email&#10;phone_no&#10;status_cd&#10;reg_dt&#10;upd_dt"
+               
                 style="height:188px"></textarea>
             </div>
             <div class="field">
               <label>header-text</label>
               <textarea id="inp-headers" rows="9"
-                placeholder="사용자 ID&#10;사용자 이름&#10;이메일&#10;전화번호&#10;상태 코드&#10;등록일시&#10;수정일시"
+               
                 style="height:188px"></textarea>
             </div>
           </div>
@@ -186,14 +187,14 @@ td.tvf  { width:90px; }
             <div class="field">
               <label>코드</label>
               <textarea id="inp-codes"
-                placeholder="A001&#10;B001&#10;C001"
+               
                 style="height:80px"
                 oninput="parseCodes()"></textarea>
             </div>
             <div class="field">
               <label>주석</label>
               <textarea id="inp-code-comments"
-                placeholder="A001&#10;B001&#10;C001"
+               
                 style="height:80px"
                 oninput="parseCodes()"></textarea>
             </div>
@@ -232,6 +233,7 @@ td.tvf  { width:90px; }
             <tr>
               <th style="width:10px">#</th>
               <th style="width:10px">삭제</th>
+              <th style="width:34px">검색</th>
               <th style="width:41px">tag type</th>
               <th style="width:100px">header-text</th>
               <th style="width:100px">data-field</th>
@@ -243,7 +245,7 @@ td.tvf  { width:90px; }
             </tr>
           </thead>
           <tbody id="col-tbody">
-            <tr><td colspan="10" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼 입력 후 파싱 버튼을 클릭하세요</td></tr>
+            <tr><td colspan="11" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼 입력 후 파싱 버튼을 클릭하세요</td></tr>
           </tbody>
         </table>
       </div>
@@ -256,19 +258,23 @@ td.tvf  { width:90px; }
         <button class="btn btn-copy" onclick="copyOutput()">복사</button>
       </div>
       <div style="padding:5px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:2px">
-        <div class="out-tab active" onclick="switchOutTab('all',this)">전체</div>
-        <div class="out-tab" onclick="switchOutTab('html',this)">html</div>
-        <div class="out-tab" onclick="switchOutTab('script',this)">script</div>
+        <div class="out-tab" onclick="switchOutTab('em',this)">em</div>
+        <div class="out-tab active" onclick="switchOutTab('list',this)">list</div>
+        <div class="out-tab" onclick="switchOutTab('detail',this)">detail</div>
+        <div class="out-tab" onclick="switchOutTab('popup',this)">popup</div>
       </div>
       <div class="output-wrap">
-        <div id="out-all">
-          <pre id="out-all-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
+        <div id="out-em" style="display:none">
+          <pre id="out-em-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
         </div>
-        <div id="out-html" style="display:none">
-          <pre id="output" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
+        <div id="out-list">
+          <pre id="out-list-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
         </div>
-        <div id="out-script" style="display:none">
-          <pre id="out-script-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
+        <div id="out-detail" style="display:none">
+          <pre id="out-detail-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
+        </div>
+        <div id="out-popup" style="display:none">
+          <pre id="out-popup-pre" style="color:var(--muted);font-style:italic">코드 생성 버튼을 클릭하세요...</pre>
         </div>
       </div>
     </div>
@@ -296,7 +302,7 @@ function mkCol(dataField = '', headerText = '', tag = 'sc-data-column') {
   return {
     tag, headerText, dataField,
     width: '100', editable: false, textAlign: 'center', required: false,
-    items: '',
+    items: '', search: false,
   };
 }
 
@@ -328,7 +334,12 @@ function addCol() {
   document.querySelector('.table-wrap').scrollTop = 9999;
 }
 
-function deleteCol(i) { cols.splice(i, 1); renderTable(); }
+function deleteCol(i) {
+  cols.splice(i, 1);
+  document.getElementById('inp-fields').value  = cols.map(c => c.dataField).join('\n');
+  document.getElementById('inp-headers').value = cols.map(c => c.headerText).join('\n');
+  renderTable();
+}
 
 function upd(i, key, val)  { cols[i][key] = val; }
 function updTag(i, val)    { cols[i].tag = val; if (val === 'sc-combobox-column') cols[i].textAlign = 'center'; renderTable(); }
@@ -338,7 +349,7 @@ function updBool(i, key, v){ cols[i][key] = v; }
 function renderTable() {
   const tbody = document.getElementById('col-tbody');
   if (!cols.length) {
-    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼을 추가하거나 파싱하세요</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--muted);font-size:.79rem">컬럼을 추가하거나 파싱하세요</td></tr>';
     return;
   }
   const TAGS = [
@@ -387,9 +398,13 @@ function renderTable() {
         : `<input type="text" value="${xe(c.items)}" oninput="upd(${i},'items',this.value)">`)
       : '<span class="dash">—</span>';
 
+    const srchChk = isField ? '<span class="dash">—</span>'
+      : `<input type="checkbox"${c.search?' checked':''} onchange="updBool(${i},'search',this.checked)">`;
+
     return `<tr>
       <td class="tn">${i+1}</td>
       <td class="tdl"><button class="btn btn-danger btn-icon" onclick="deleteCol(${i})">×</button></td>
+      <td class="tck">${srchChk}</td>
       <td class="ttag">${tagSel}</td>
       <td class="thdr">${hdrInp}</td>
       <td class="tfld">${fldInp}</td>
@@ -520,7 +535,7 @@ function generate() {
 
   // ── sc-ajax ──
   const ajaxLines = [
-    `<!--  List Search -->`,
+    `<!-- Search -->`,
     `<sc-ajax id="${findId}"`,
     `         url="${findId}.do"`,
     `         body="{{searchParam}}"`,
@@ -547,7 +562,30 @@ function generate() {
   }
   const ajaxBlock = ajaxLines.join('\n');
 
-  const rawOutput = [codeGroupBlock, ajaxBlock, parts.join('\n')].filter(Boolean).join('\n\n');
+  // ── search panel ──
+  const searchFieldsets = cols
+    .filter(c => c.search && c.tag !== 'sc-data-field')
+    .map(col => {
+      let inputEl;
+      if (col.tag === 'sc-combobox-column') {
+        const rawItems = (col.items || '').trim();
+        const itemsVal = rawItems.startsWith('{{') ? rawItems
+          : rawItems.startsWith('codes.') ? `{{${rawItems.toLowerCase()}}}`
+          : `{{codes.${rawItems.toLowerCase()}}}`;
+        inputEl = `${I16}<sc-multi-combobox-field value="{{searchParam.${col.dataField}}}" items="${itemsVal}" display-field="label" value-field="data" placeholder="전체"></sc-multi-combobox-field>`;
+      } else {
+        inputEl = `${I16}<sc-text-field value="{{searchParam.${col.dataField}}}"></sc-text-field>`;
+      }
+      return `${I12}<cc-fieldset>\n${I16}<sc-label text="${col.headerText}"></sc-label>\n${inputEl}\n${I12}</cc-fieldset>`;
+    });
+  const searchPanelBlock = [
+    `<!-- 검색 박스 -->`,
+    `<cc-search-condition-panel on-search="onFindList" on-enter="onFindList">`,
+    ...searchFieldsets,
+    `</cc-search-condition-panel>`,
+  ].join('\n');
+
+  const rawOutput = [codeGroupBlock, ajaxBlock, searchPanelBlock, parts.join('\n')].filter(Boolean).join('\n\n');
 
   const indented = rawOutput.split('\n').map(l => '        ' + l).join('\n');
   const sc = '<' + 'script>', ec = '</' + 'script>';
@@ -703,9 +741,60 @@ function generate() {
 
   const fullModule = htmlModule.replace('</dom-module>', '\n' + scriptBlock + '\n</dom-module>');
 
-  document.getElementById('out-all-pre').innerHTML = hlXml(fullModule);
-  document.getElementById('output').innerHTML = hlXml(htmlModule);
-  document.getElementById('out-script-pre').textContent = scriptBlock;
+  document.getElementById('out-list-pre').innerHTML = hlXml(fullModule);
+
+  // ── em module ──
+  const sc2 = '<' + 'script>', ec2 = '</' + 'script>';
+  const listModuleId   = `es-${kebabModule}-list`;
+  const detailModuleId = `es-${kebabModule}-detail`;
+  const emModuleId     = `em-${kebabModule}`;
+
+  const emModule = [
+    `<sc-link rel="import" href="${listModuleId}.html"></sc-link>`,
+    `<sc-link rel="import" href="${detailModuleId}.html"></sc-link>`,
+    ``,
+    `<dom-module id="${emModuleId}">`,
+    `    <style>`,
+    `        :host {`,
+    `            @apply(--vbox-layout);`,
+    `        }`,
+    `    </style>`,
+    ``,
+    `    <template>`,
+    `        <cc-page-title-bar></cc-page-title-bar>`,
+    ``,
+    `        <sc-pages id="pages" class="fit">`,
+    `            <${listModuleId} id="list" on-show-detail="onShowDetail"></${listModuleId}>`,
+    `            <template>`,
+    `                <${detailModuleId} id="detail" on-close="onShowList"></${detailModuleId}>`,
+    `            </template>`,
+    `        </sc-pages>`,
+    `    </template>`,
+    ``,
+    `    ` + sc2,
+    `        Polymer({`,
+    `            is : "${emModuleId}",`,
+    ``,
+    `            onShowDetail: function(e, data) {`,
+    `                var me = this;`,
+    `                me.$.pages.selectItem(me.$.detail);`,
+    `                me.$.detail.load(data);`,
+    `            },`,
+    ``,
+    `            onShowList: function(e, data){`,
+    `                var me = this;`,
+    ``,
+    `                me.$.pages.selectItem(me.$.list);`,
+    `                if(data.isSuccess) {`,
+    `                    me.$.list.load();`,
+    `                }`,
+    `            }`,
+    `        });`,
+    `    ` + ec2,
+    `</dom-module>`,
+  ].join('\n');
+
+  document.getElementById('out-em-pre').innerHTML = hlXml(emModule);
 }
 
 /* ── BUILD ATTRS ── */
@@ -774,6 +863,29 @@ function colorAttrs(s) {
   );
 }
 
+/* ── RESET ── */
+function resetAll() {
+  document.getElementById('inp-module').value       = '';
+  document.getElementById('inp-fields').value       = '';
+  document.getElementById('inp-headers').value      = '';
+  document.getElementById('inp-codes').value        = '';
+  document.getElementById('inp-code-comments').value = '';
+  document.getElementById('tb-add').checked  = true;
+  document.getElementById('tb-del').checked  = true;
+  document.getElementById('tb-save').checked = true;
+  cols = [];
+  codes = [];
+  codeComments = [];
+  renderTable();
+  const placeholder = '코드 생성 버튼을 클릭하세요...';
+  ['em', 'list', 'detail', 'popup'].forEach(t => {
+    const el = document.getElementById('out-' + t + '-pre');
+    el.innerHTML = placeholder;
+    el.style.color = 'var(--muted)';
+    el.style.fontStyle = 'italic';
+  });
+}
+
 /* ── SAMPLE ── */
 function loadSample() {
   document.getElementById('inp-module').value = 'module';
@@ -797,19 +909,17 @@ function loadSample() {
 function switchOutTab(name, el) {
   document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('out-all').style.display    = name === 'all'    ? '' : 'none';
-  document.getElementById('out-html').style.display   = name === 'html'   ? '' : 'none';
-  document.getElementById('out-script').style.display = name === 'script' ? '' : 'none';
+  document.getElementById('out-em').style.display     = name === 'em'     ? '' : 'none';
+  document.getElementById('out-list').style.display   = name === 'list'   ? '' : 'none';
+  document.getElementById('out-detail').style.display = name === 'detail' ? '' : 'none';
+  document.getElementById('out-popup').style.display  = name === 'popup'  ? '' : 'none';
 }
 
 /* ── COPY ── */
 function copyOutput() {
   const active = document.querySelector('.out-tab.active').textContent.trim();
-  const text = active === 'script'
-    ? document.getElementById('out-script-pre').textContent
-    : active === 'html'
-    ? document.getElementById('output').textContent
-    : document.getElementById('out-all-pre').textContent;
+  const el = document.getElementById(`out-${active}-pre`);
+  const text = el ? el.textContent : '';
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.btn-copy');
     const orig = btn.textContent;
