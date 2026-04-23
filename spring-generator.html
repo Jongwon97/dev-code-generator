@@ -109,6 +109,7 @@ input::placeholder { color:var(--muted); }
   <h1><span class="logo">Spring</span> <span class="sub">Backend Generator</span></h1>
   <div class="hdr-actions">
     <button class="btn btn-ghost btn-xs" onclick="loadSample()">샘플 불러오기</button>
+    <button class="btn btn-ghost btn-xs" onclick="resetAll()">초기화</button>
     <button class="btn btn-download btn-xs" onclick="downloadZip()">⬇ ZIP 다운로드</button>
   </div>
 </header>
@@ -125,26 +126,26 @@ input::placeholder { color:var(--muted); }
         <div class="section-box">
           <div class="field">
             <label>기본 패키지</label>
-            <input type="text" id="base-pkg" placeholder="com.example.app" oninput="onModuleChange()" />
+            <input type="text" id="base-pkg" oninput="onModuleChange()" />
           </div>
           <div class="row2">
             <div class="field">
               <label>모듈명 <span class="note">(camelCase)</span></label>
-              <input type="text" id="module-name" placeholder="sampleModule" oninput="onModuleChange()" />
+              <input type="text" id="module-name" oninput="onModuleChange()" />
             </div>
             <div class="field">
               <label>기능 설명 <span class="note">(한글)</span></label>
-              <input type="text" id="feature-ko" placeholder="샘플 모듈" oninput="onModuleChange()" />
+              <input type="text" id="feature-ko" oninput="onModuleChange()" />
             </div>
           </div>
           <div class="row2">
             <div class="field">
               <label>URL 매핑 경로 <span class="note">(자동 생성)</span></label>
-              <input type="text" id="url-mapping" placeholder="sampleModule" />
+              <input type="text" id="url-mapping" />
             </div>
             <div class="field">
               <label>네임스페이스 <span class="note">(자동 생성)</span></label>
-              <input type="text" id="namespace" placeholder="sam-mod" />
+              <input type="text" id="namespace" />
             </div>
           </div>
         </div>
@@ -156,11 +157,11 @@ input::placeholder { color:var(--muted); }
           <div class="row2">
             <div class="field">
               <label>작성자</label>
-              <input type="text" id="author" placeholder="Gildong Hong" />
+              <input type="text" id="author" />
             </div>
             <div class="field">
               <label>작성일</label>
-              <input type="text" id="date" placeholder="2026. 03. 25" />
+              <input type="text" id="date" />
             </div>
           </div>
         </div>
@@ -216,7 +217,7 @@ input::placeholder { color:var(--muted); }
             </div>
             <div style="padding-left:22px;">
               <div class="row2">
-                <input type="text" id="pk-field" placeholder="UUID 컬럼명 (PK 필드)" />
+                <input type="text" id="pk-field" />
               </div>
             </div>
             <div class="opt-row">
@@ -225,8 +226,8 @@ input::placeholder { color:var(--muted); }
             </div>
             <div style="padding-left:22px;">
               <div class="row2">
-                <input type="text" id="seq-col" placeholder="채번 컬럼명" oninput="onInputChange()" />
-                <input type="text" id="seq-code" placeholder="채번 코드" oninput="onInputChange()" />
+                <input type="text" id="seq-col" oninput="onInputChange()" />
+                <input type="text" id="seq-code" oninput="onInputChange()" />
               </div>
             </div>
             <div class="opt-row">
@@ -326,11 +327,13 @@ function toCamel(s) {
   if (!s) return '';
   return s.charAt(0).toLowerCase() + s.slice(1);
 }
-// moduleStatus → mod-sts
+// sampleModule → sample-module
 function toNamespace(mod) {
   if (!mod) return '';
-  const words = mod.replace(/([A-Z])/g, ' $1').trim().split(/\s+/);
-  return words.map(w => w.slice(0, 3).toLowerCase()).join('-');
+  return mod
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[_\s]+/g, '-')
+    .toLowerCase();
 }
 function toUrlMapping(basePkg, mod) {
   return mod || '';
@@ -874,6 +877,39 @@ async function downloadZip() {
   a.click();
   URL.revokeObjectURL(url);
   showToast(`${mod}.zip 다운로드 완료 ✓`);
+}
+
+function resetAll() {
+  document.getElementById('base-pkg').value    = '';
+  document.getElementById('module-name').value = '';
+  document.getElementById('feature-ko').value  = '';
+  const urlEl = document.getElementById('url-mapping');
+  urlEl.value = '';
+  delete urlEl.dataset.manual;
+  const nsEl = document.getElementById('namespace');
+  nsEl.value = '';
+  delete nsEl.dataset.manual;
+  document.getElementById('author').value = '';
+  document.getElementById('date').value   = today();
+  document.getElementById('pk-field').value  = '';
+  document.getElementById('seq-col').value   = '';
+  document.getElementById('seq-code').value  = '';
+  document.getElementById('opt-find-one').checked    = true;
+  document.getElementById('opt-find-list').checked   = true;
+  document.getElementById('opt-save-one').checked    = true;
+  document.getElementById('opt-save').checked        = true;
+  document.getElementById('opt-delete-one').checked  = true;
+  document.getElementById('opt-delete').checked      = true;
+  document.getElementById('opt-uuid').checked        = true;
+  document.getElementById('opt-seq').checked         = false;
+  document.getElementById('opt-dup-check').checked   = true;
+  document.getElementById('opt-blank-check').checked = true;
+  document.getElementById('code-ctrl').innerHTML = '';
+  document.getElementById('code-svc').innerHTML  = '';
+  document.getElementById('code-repo').innerHTML = '';
+  generatedText = {};
+  rawText = {};
+  showToast('입력이 초기화되었습니다');
 }
 
 function loadSample() {
