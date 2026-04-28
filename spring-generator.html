@@ -32,14 +32,14 @@ header h1 { font-size:1.1rem; font-weight:700; }
 .hdr-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
 .layout { display:grid; grid-template-columns:500px 1fr; flex:1; overflow:hidden; }
 .panel { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); background:var(--surface2); }
-.panel-title { padding:9px 14px; font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
-.panel-body { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:16px; }
-.section-label { font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
-.section-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
-.field { display:flex; flex-direction:column; gap:5px; }
-.field label { font-size:.82rem; font-weight:700; color:var(--text); }
+.panel-title { padding:7px 14px; font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.panel-body { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
+.section-label { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+.section-box { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:11px 12px; display:flex; flex-direction:column; gap:8px; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:.78rem; font-weight:600; color:var(--text); }
 .field label .note { font-weight:400; color:var(--muted); font-size:.75rem; }
-input[type=text], select { background:var(--surface3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:inherit; font-size:.85rem; padding:7px 10px; width:100%; transition:border-color .15s; }
+input[type=text], select { background:var(--surface3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:inherit; font-size:.82rem; padding:5px 8px; width:100%; transition:border-color .15s; }
 input[type=text]:focus, select:focus { outline:none; border-color:var(--primary-h); box-shadow:0 0 0 2px rgba(56,139,253,.15); }
 input::placeholder { color:var(--muted); }
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -122,16 +122,22 @@ input::placeholder { color:var(--muted); }
     <div class="panel-body">
 
       <div style="display:flex;flex-direction:column;gap:6px">
-        <span class="section-label">패키지 / 모듈 정보</span>
+        <span class="section-label">모듈명</span>
         <div class="section-box">
           <div class="field">
-            <label>기본 패키지</label>
-            <input type="text" id="base-pkg" oninput="onModuleChange()" />
+            <label>Module Name</label>
+            <input type="text" id="module-name" oninput="onModuleChange()" />
           </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="section-label">패키지 / 모듈 정보</span>
+        <div class="section-box">
           <div class="row2">
             <div class="field">
-              <label>모듈명 <span class="note">(camelCase)</span></label>
-              <input type="text" id="module-name" oninput="onModuleChange()" />
+              <label>기본 패키지</label>
+              <input type="text" id="base-pkg" oninput="onModuleChange()" />
             </div>
             <div class="field">
               <label>기능 설명 <span class="note">(한글)</span></label>
@@ -141,11 +147,11 @@ input::placeholder { color:var(--muted); }
           <div class="row2">
             <div class="field">
               <label>URL 매핑 경로 <span class="note">(자동 생성)</span></label>
-              <input type="text" id="url-mapping" />
+              <input type="text" id="url-mapping" placeholder="" />
             </div>
             <div class="field">
               <label>네임스페이스 <span class="note">(자동 생성)</span></label>
-              <input type="text" id="namespace" />
+              <input type="text" id="namespace" placeholder="" />
             </div>
           </div>
         </div>
