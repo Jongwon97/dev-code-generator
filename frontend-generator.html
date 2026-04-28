@@ -164,13 +164,13 @@ td.tvf  { width:90px; }
             <div class="field">
               <label>data-field</label>
               <textarea id="inp-fields" rows="9"
-               
+                placeholder=""
                 style="height:188px"></textarea>
             </div>
             <div class="field">
               <label>header-text</label>
               <textarea id="inp-headers" rows="9"
-               
+                placeholder=""
                 style="height:188px"></textarea>
             </div>
           </div>
@@ -187,14 +187,14 @@ td.tvf  { width:90px; }
             <div class="field">
               <label>코드</label>
               <textarea id="inp-codes"
-               
+                placeholder=""
                 style="height:80px"
                 oninput="parseCodes()"></textarea>
             </div>
             <div class="field">
               <label>주석</label>
               <textarea id="inp-code-comments"
-               
+                placeholder=""
                 style="height:80px"
                 oninput="parseCodes()"></textarea>
             </div>
@@ -203,12 +203,30 @@ td.tvf  { width:90px; }
       </div>
 
       <div class="section">
-        <div class="section-label">Toolbar 버튼</div>
+        <div class="section-label">List 기능</div>
         <div class="section-box">
           <div class="checks-inline">
             <div class="check-row"><input type="checkbox" id="tb-add"  checked><label for="tb-add">추가<span style="color:var(--muted);font-size:.75rem">(onAdd)</span></label></div>
             <div class="check-row"><input type="checkbox" id="tb-del"  checked><label for="tb-del">삭제<span style="color:var(--muted);font-size:.75rem">(onDelete)</span></label></div>
             <div class="check-row"><input type="checkbox" id="tb-save" checked><label for="tb-save">저장<span style="color:var(--muted);font-size:.75rem">(onSave)</span></label></div>
+            <div class="check-row"><input type="checkbox" id="tb-create"><label for="tb-create">등록<span style="color:var(--muted);font-size:.75rem">(onCreate)</span></label></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">상세 화면 기능</div>
+        <div class="section-box">
+          <div class="checks-inline">
+            <div class="check-row"><input type="checkbox" id="tb-item-click" checked onchange="toggleItemClickField()"><label for="tb-item-click">상세보기<span style="color:var(--muted);font-size:.75rem">(onItemClick)</span></label></div>
+          </div>
+          <div id="item-click-field-wrap" style="margin-top:4px">
+            <input type="text" id="item-click-field">
+          </div>
+          <div class="checks-inline" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <div class="check-row"><input type="checkbox" id="detail-save"  checked><label for="detail-save">저장<span style="color:var(--muted);font-size:.75rem">(onSave)</span></label></div>
+            <div class="check-row"><input type="checkbox" id="detail-del"   checked><label for="detail-del">삭제<span style="color:var(--muted);font-size:.75rem">(onDelete)</span></label></div>
+            <div class="check-row"><input type="checkbox" id="detail-close" checked><label for="detail-close">닫기<span style="color:var(--muted);font-size:.75rem">(onClose)</span></label></div>
           </div>
         </div>
       </div>
@@ -322,7 +340,16 @@ function parseInput() {
   if (!fields) return;
   const fLines = fields.split('\n').map(l => l.trim()).filter(Boolean);
   const hLines = headers.split('\n').map(l => l.trim());
-  cols = fLines.map((f, i) => mkCol(f, hLines[i] ?? ''));
+  cols = fLines.map((f, i) => {
+    const col = mkCol(f, hLines[i] ?? '');
+    const codeIdx = codeComments.findIndex(c => c === (hLines[i] ?? '').trim());
+    if (codeIdx !== -1 && codes[codeIdx]) {
+      col.tag = 'sc-combobox-column';
+      col.textAlign = 'center';
+      col.items = codes[codeIdx];
+    }
+    return col;
+  });
   renderTable();
 }
 
@@ -434,14 +461,21 @@ function generate() {
     : 'module';
   const moduleId = `es-${kebabModule}-list`;
   const findId   = 'find' + capModule + 'List';
-  const saveId   = 'save' + capModule;
-  const deleteId = 'delete' + capModule;
+  const saveId   = 'save' + capModule + 'List';
+  const deleteId = 'delete' + capModule + 'List';
   const showAdd  = document.getElementById('tb-add').checked;
   const showDel  = document.getElementById('tb-del').checked;
-  const showSave = document.getElementById('tb-save').checked;
+  const showSave   = document.getElementById('tb-save').checked;
+  const showCreate    = document.getElementById('tb-create').checked;
+  const showItemClick   = document.getElementById('tb-item-click').checked;
+  const itemClickField  = document.getElementById('item-click-field').value.trim() || 'column';
+  const showDetailSave  = document.getElementById('detail-save').checked;
+  const showDetailDel   = document.getElementById('detail-del').checked;
+  const showDetailClose = document.getElementById('detail-close').checked;
   const fnAdd    = 'onAdd';
   const fnDel    = 'onDelete';
   const fnSave   = 'onSave';
+  const fnCreate = 'onCreate';
 
   const displayCols = cols.filter(c => c.tag !== 'sc-data-field');
   const hiddenCols  = cols.filter(c => c.tag === 'sc-data-field');
@@ -464,6 +498,7 @@ function generate() {
 
   const colLines = displayCols.map(col => {
     const attrs = buildAttrs(col);
+    if (showItemClick && col.dataField === itemClickField) attrs.push(['style-name', 'link']);
     const tag   = col.tag.padEnd(tagW);
     const attrStr = attrs.map(([k, v], j) => {
       const s = `${k}="${v}"`;
@@ -485,14 +520,15 @@ function generate() {
 
   // ── toolbar ──
   let toolbarBlock = '';
-  if (showAdd || showDel || showSave) {
+  if (showAdd || showDel || showSave || showCreate) {
     const active = [];
-    if (showAdd)  active.push([fnAdd,  '추가']);
-    if (showDel)  active.push([fnDel,  '삭제']);
-    if (showSave) active.push([fnSave, '저장']);
+    if (showAdd)    active.push([fnAdd,    '추가', true]);
+    if (showDel)    active.push([fnDel,    '삭제', true]);
+    if (showSave)   active.push([fnSave,   '저장', true]);
+    if (showCreate) active.push([fnCreate, '등록', false]);
     const maxFnW = Math.max(...active.map(([fn]) => fn.length));
-    const btns = active.map(([fn, txt]) =>
-      `${I16}<sc-button text="${txt}" on-click="${fn}"${' '.repeat(maxFnW - fn.length)} auth-s></sc-button>`
+    const btns = active.map(([fn, txt, hasAuth]) =>
+      `${I16}<sc-button text="${txt}" on-click="${fn}"${' '.repeat(maxFnW - fn.length)}${hasAuth ? ' auth-s' : ''}></sc-button>`
     );
     toolbarBlock = `${I12}<cc-grid-toolbar>\n${btns.join('\n')}\n${I12}</cc-grid-toolbar>`;
   }
@@ -509,12 +545,14 @@ function generate() {
 
   const hasEditable = cols.some(c => c.editable);
 
-  const parts = [
+  const gridLines = [
     `<sc-grid id="${gridId}"`,
-    ...(hasEditable
-      ? [`         data-provider="${provider}"`, `         editable="true">`]
-      : [`         data-provider="${provider}">`]),
+    `         data-provider="${provider}"`,
   ];
+  if (hasEditable)    gridLines.push(`         editable="true"`);
+  if (showItemClick)  gridLines.push(`         on-item-click="onItemClick"`);
+  gridLines[gridLines.length - 1] += '>';
+  const parts = [...gridLines];
   if (toolbarBlock) parts.push(toolbarBlock);
   parts.push(`${I12}<sc-grid-columns>`);
   parts.push(...colLines);
@@ -598,6 +636,8 @@ function generate() {
     '    </style>',
     '',
     '    <template>',
+    '        <cc-page-title-bar></cc-page-title-bar>',
+    '',
     indented,
     '    </template>',
     '</dom-module>',
@@ -639,6 +679,34 @@ function generate() {
       `${I16s}var me = this,`,
       `${I20s}provider = me.$.gridPanel.getDataProvider();`,
       `${I16s}provider.addItemAt(0);`,
+      `${I12s}},`,
+    );
+  }
+
+  // 등록
+  if (showCreate) {
+    methodLines.push(
+      '',
+      `${I12s}// 등록`,
+      `${I12s}${fnCreate}: function() {`,
+      `${I16s}this.fire("show-detail", {isNew: true});`,
+      `${I12s}},`,
+    );
+  }
+
+  // 그리드 클릭 시
+  if (showItemClick) {
+    methodLines.push(
+      '',
+      `${I12s}// 그리드 클릭 시`,
+      `${I12s}onItemClick: function(event) {`,
+      `${I16s}var item = event.detail.item;`,
+      `${I16s}var data = event.detail.data;`,
+      '',
+      `${I16s}if(item.dataField == "${itemClickField}") {`,
+      `${I20s}data.isNew = false;`,
+      `${I20s}this.fire("show-detail", data);`,
+      `${I16s}}`,
       `${I12s}},`,
     );
   }
@@ -761,8 +829,6 @@ function generate() {
     `    </style>`,
     ``,
     `    <template>`,
-    `        <cc-page-title-bar></cc-page-title-bar>`,
-    ``,
     `        <sc-pages id="pages" class="fit">`,
     `            <${listModuleId} id="list" on-show-detail="onShowDetail"></${listModuleId}>`,
     `            <template>`,
@@ -795,6 +861,242 @@ function generate() {
   ].join('\n');
 
   document.getElementById('out-em-pre').innerHTML = hlXml(emModule);
+
+  // ── detail module ──
+  const findDetailId    = 'find'   + capModule;
+  const saveDetailId    = 'save'   + capModule;
+  const deleteDetailId  = 'delete' + capModule;
+  const doFindFn        = 'doFind'        + moduleName;
+  const completeFindFn  = 'completeFind'  + moduleName;
+
+  const D8  = '        ';
+  const D12 = '            ';
+  const D16 = '                ';
+  const D20 = '                    ';
+
+  // code group
+  let detailCodeGroup = '';
+  if (codes.length) {
+    const codeLines2 = codes.map((cd, i) => {
+      const cmt = codeComments[i] ? `${D12}<!-- ${codeComments[i]} -->\n` : '';
+      return `${cmt}${D12}<sc-code code="${cd}" value="{{codes.${cd.toLowerCase()}}}"></sc-code>`;
+    });
+    detailCodeGroup = [
+      `${D8}<!-- 공통코드 조회 -->`,
+      `${D8}<sc-request-group init>`,
+      `${D12}<sc-code-group>`,
+      ...codeLines2,
+      `${D12}</sc-code-group>`,
+      `${D8}</sc-request-group>`,
+      '',
+    ].join('\n');
+  }
+
+  // ajax
+  const detailAjaxLines = [
+    `${D8}<!-- 상세 조회 -->`,
+    `${D8}<sc-ajax id="${findDetailId}"`,
+    `${D8}         url="${findDetailId}.do"`,
+    `${D8}         on-response="${completeFindFn}">`,
+    `${D8}</sc-ajax>`,
+  ];
+  if (showDetailSave) detailAjaxLines.push('',
+    `${D8}<!-- 저장 -->`,
+    `${D8}<sc-ajax id="${saveDetailId}"`,
+    `${D8}         url="${saveDetailId}.do">`,
+    `${D8}</sc-ajax>`,
+  );
+  if (showDetailDel) detailAjaxLines.push('',
+    `${D8}<!-- 삭제 -->`,
+    `${D8}<sc-ajax id="${deleteDetailId}"`,
+    `${D8}         url="${deleteDetailId}.do">`,
+    `${D8}</sc-ajax>`,
+  );
+
+  // page title bar buttons
+  const dtBtns = [];
+  if (showDetailSave)  dtBtns.push(`${D12}<sc-button text="저장" on-click="onSave" auth-s></sc-button>`);
+  if (showDetailDel)   dtBtns.push(`${D12}<sc-button text="삭제" on-click="onDelete" hidden="[[formula('isNew')]]"></sc-button>`);
+  if (showDetailClose) dtBtns.push(`${D12}<sc-button text="닫기" on-click="onClose"></sc-button>`);
+  const dtTitleBar = dtBtns.length
+    ? `${D8}<cc-page-title-bar>\n${dtBtns.join('\n')}\n${D8}</cc-page-title-bar>`
+    : `${D8}<cc-page-title-bar></cc-page-title-bar>`;
+
+  // fieldsets (sc-data-column → sc-text-field, sc-combobox-column → sc-combobox-field)
+  const comboPad = ' '.repeat(D16.length + '<sc-combobox-field '.length);
+  const detailFieldsets = cols
+    .filter(c => c.tag === 'sc-data-column' || c.tag === 'sc-combobox-column')
+    .map(col => {
+      let inputEl;
+      if (col.tag === 'sc-combobox-column') {
+        const rawItems = (col.items || '').trim();
+        const itemsVal = rawItems.startsWith('{{') ? rawItems
+          : rawItems.startsWith('codes.') ? `{{${rawItems.toLowerCase()}}}`
+          : `{{codes.${rawItems.toLowerCase()}}}`;
+        inputEl = `${D16}<sc-combobox-field value="{{${moduleName}.${col.dataField}}}" placeholder="선택"\n${comboPad}items="${itemsVal}" display-field="label" value-field="data"></sc-combobox-field>`;
+      } else {
+        inputEl = `${D16}<sc-text-field value="{{${moduleName}.${col.dataField}}}"></sc-text-field>`;
+      }
+      return `${D12}<cc-fieldset>\n${D16}<sc-label text="${col.headerText}"></sc-label>\n${inputEl}\n${D12}</cc-fieldset>`;
+    });
+
+  const dtFormPanel = [`${D8}<cc-form-panel column="4">`, ...detailFieldsets, `${D8}</cc-form-panel>`].join('\n');
+
+  const dtTemplate = [...(detailCodeGroup ? [detailCodeGroup] : []), detailAjaxLines.join('\n'), '', dtTitleBar, '', dtFormPanel].join('\n');
+
+  // script methods
+  const sc3 = '<' + 'script>', ec3 = '</' + 'script>';
+  const dm = [];
+
+  dm.push(
+    `            load: function(data) {`,
+    `                var me = this;`,
+    `                me.isNew = data.isNew;`,
+    `                me.applyFormula("isNew");`,
+    ``,
+    `                if(UT.isEmpty(me.isNew) || !me.isNew) {`,
+    `                    me.searchParam = data;`,
+    `                    me.${doFindFn}();`,
+    `                }`,
+    `            },`,
+    ``,
+    `            // 조회`,
+    `            ${doFindFn}: function() {`,
+    `                var me = this;`,
+    `                me.$.${findDetailId}.body = me.searchParam;`,
+    `                UT.request(me.$.${findDetailId});`,
+    `            },`,
+    `            ${completeFindFn}: function(e, res) {`,
+    `                var me = this,`,
+    `                    result = res.response;`,
+    ``,
+    `                if(UT.isNotEmpty(result)) {`,
+    `                    me.set("${moduleName}", result);`,
+    `                } else {`,
+    `                    me.set("${moduleName}", {});`,
+    `                }`,
+    `            },`,
+  );
+
+  if (showDetailSave) dm.push('',
+    `            // 저장`,
+    `            onSave: function() {`,
+    `                var me = this;`,
+    ``,
+    `                // 유효성 검사`,
+    `                if(!me.validate()) {`,
+    `                    UT.alert("STD.E9000");`,
+    `                    return;`,
+    `                }`,
+    ``,
+    `                // Save?`,
+    `                UT.confirm("STD.N1200", function() {`,
+    `                    me.$.${saveDetailId}.body = me.${moduleName};`,
+    `                    UT.request(me.$.${saveDetailId}, (e, res) => {`,
+    `                        var result = res.response;`,
+    `                        if (result.success) {`,
+    `                            UT.alert("STD.N2400");`,
+    `                            me.set("${moduleName}", result.resultData);`,
+    `                        }`,
+    `                    });`,
+    `                });`,
+    `            },`,
+  );
+
+  if (showDetailDel) dm.push('',
+    `            // 삭제`,
+    `            onDelete: function() {`,
+    `                var me = this;`,
+    ``,
+    `                // Delete?`,
+    `                UT.confirm("STD.N1300", function() {`,
+    `                    me.$.${deleteDetailId}.body = me.${moduleName};`,
+    `                    UT.request(me.$.${deleteDetailId}, (e, res) => {`,
+    `                        var result = res.response;`,
+    `                        if(result.success) {`,
+    `                            UT.alert("STD.N2500");`,
+    `                            me.onClose({isSuccess: true});`,
+    `                        }`,
+    `                    });`,
+    `                });`,
+    `            },`,
+  );
+
+  if (showDetailClose) dm.push('',
+    `            // 닫기`,
+    `            onClose: function(data) {`,
+    `                var me = this;`,
+    `                me.fire("close", data);`,
+    `                me.reset();`,
+    `            },`,
+  );
+
+  const dtScript = [
+    `    ` + sc3,
+    `        Polymer({`,
+    `            is : "${detailModuleId}",`,
+    ``,
+    `            properties: {`,
+    `                // 공통 코드`,
+    `                codes:{`,
+    `                    type:Object,`,
+    `                    reset:false,`,
+    `                    value: function(){`,
+    `                        return {};`,
+    `                    }`,
+    `                },`,
+    ``,
+    `                // 조회 조건`,
+    `                searchParam: {`,
+    `                    type: Object,`,
+    `                    value: function() {`,
+    `                        return {};`,
+    `                    }`,
+    `                },`,
+    ``,
+    `                isNew: {`,
+    `                    type: Object,`,
+    `                    value: function() {`,
+    `                        return {};`,
+    `                    }`,
+    `                },`,
+    ``,
+    `                ${moduleName}: {`,
+    `                    type: Object,`,
+    `                    value: function() {`,
+    `                        return {};`,
+    `                    }`,
+    `                },`,
+    `            },`,
+    ``,
+    `            formulas: {`,
+    `                isNew: function() {`,
+    `                    return UT.isNotEmpty(this.isNew) && this.isNew==true;`,
+    `                },`,
+    `            },`,
+    ``,
+    ...dm,
+    `        });`,
+    `    ` + ec3,
+  ].join('\n');
+
+  const dtModule = [
+    `<dom-module id="${detailModuleId}">`,
+    `    <style>`,
+    `        :host {`,
+    `            @apply(--vbox-layout);`,
+    `        }`,
+    `    </style>`,
+    ``,
+    `    <template>`,
+    dtTemplate,
+    `    </template>`,
+    ``,
+    dtScript,
+    `</dom-module>`,
+  ].join('\n');
+
+  document.getElementById('out-detail-pre').innerHTML = hlXml(dtModule);
 }
 
 /* ── BUILD ATTRS ── */
@@ -863,6 +1165,12 @@ function colorAttrs(s) {
   );
 }
 
+/* ── TOGGLE ITEM CLICK FIELD ── */
+function toggleItemClickField() {
+  const show = document.getElementById('tb-item-click').checked;
+  document.getElementById('item-click-field-wrap').style.display = show ? '' : 'none';
+}
+
 /* ── RESET ── */
 function resetAll() {
   document.getElementById('inp-module').value       = '';
@@ -872,7 +1180,14 @@ function resetAll() {
   document.getElementById('inp-code-comments').value = '';
   document.getElementById('tb-add').checked  = true;
   document.getElementById('tb-del').checked  = true;
-  document.getElementById('tb-save').checked = true;
+  document.getElementById('tb-save').checked   = true;
+  document.getElementById('tb-create').checked    = false;
+  document.getElementById('tb-item-click').checked   = true;
+  document.getElementById('item-click-field').value  = '';
+  document.getElementById('item-click-field-wrap').style.display = '';
+  document.getElementById('detail-save').checked  = true;
+  document.getElementById('detail-del').checked   = true;
+  document.getElementById('detail-close').checked = true;
   cols = [];
   codes = [];
   codeComments = [];
