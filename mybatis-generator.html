@@ -40,8 +40,8 @@ header h1 { font-size:1.1rem; font-weight:700; }
 /* PANEL */
 .left-side { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); }
 .panel { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); background:var(--surface2); }
-.panel-title { padding:9px 14px; font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:space-between; }
-.panel-body { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:22px; }
+.panel-title { padding:7px 14px; font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:space-between; }
+.panel-body { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:14px; }
 .cond-outer { background:var(--surface2); border-top:2px solid var(--border); overflow-y:auto; max-height:260px; flex-shrink:0; }
 .cond-outer-body { padding:12px 14px; display:flex; flex-direction:column; }
 
@@ -52,12 +52,12 @@ header h1 { font-size:1.1rem; font-weight:700; }
 .namespace-bar input::placeholder { color:var(--muted); }
 
 /* FORM */
-.field { display:flex; flex-direction:column; gap:5px; }
-.field label { font-size:.82rem; font-weight:700; color:var(--text); }
-input[type=text], textarea, select { background:var(--surface3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:inherit; font-size:.85rem; padding:7px 10px; width:100%; transition:border-color .15s; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:.78rem; font-weight:600; color:var(--text); }
+input[type=text], textarea, select { background:var(--surface3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:inherit; font-size:.82rem; padding:5px 8px; width:100%; transition:border-color .15s; }
 input[type=text]:focus, textarea:focus, select:focus { outline:none; border-color:var(--primary-h); box-shadow:0 0 0 2px rgba(56,139,253,.15); }
 input::placeholder, textarea::placeholder { color:var(--muted); }
-textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-size:.82rem; line-height:1.6; }
+textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-size:.79rem; line-height:1.55; }
 .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .row3 { display:grid; grid-template-columns:2fr 1fr; gap:10px; }
 
@@ -86,7 +86,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 
 /* 조건 컬럼 그룹 */
 .cond-group { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0; display:flex; flex-direction:column; }
-.cond-group-title { padding:10px 14px; font-size:.95rem; font-weight:700; color:var(--text); border-bottom:1px solid var(--border); }
+.cond-group-title { padding:10px 14px; font-size:.68rem; font-weight:700; color:var(--text); border-bottom:1px solid var(--border); }
 .cond-section { padding:12px 14px; display:flex; flex-direction:column; gap:6px; border-left:3px solid transparent; }
 .cond-section + .cond-section { border-top:1px solid var(--border); }
 .cond-section.pk-sec   { border-left-color:var(--primary-h); }
@@ -94,19 +94,19 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 .cond-section.in-sec   { border-left-color:var(--teal); }
 .cond-section.like-sec { border-left-color:var(--orange); }
 .cond-section.date-sec { border-left-color:var(--purple); }
-.cond-section label { font-size:.82rem; font-weight:700; color:var(--text); }
+.cond-section label { font-size:.78rem; font-weight:600; color:var(--text); }
 
 /* JOIN SECTION */
 .join-section-hdr { display:flex; align-items:center; justify-content:space-between; }
-.join-section-hdr .lbl { font-size:.92rem; font-weight:700; color:var(--text); }
+.join-section-hdr .lbl { font-size:.68rem; font-weight:700; color:var(--text); }
 .base-card { background:var(--bg); border:1px solid rgba(56,139,253,.25); border-left:3px solid var(--primary-h); border-radius:6px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
-.base-card-lbl { font-size:.92rem; font-weight:700; color:var(--text); letter-spacing:.04em; }
+.base-card-lbl { font-size:.68rem; font-weight:700; color:var(--text); letter-spacing:.04em; }
 .join-card { background:var(--bg); border:1px solid rgba(227,179,65,.35); border-left:3px solid var(--yellow); border-radius:6px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; margin-top:5px; }
 .join-row-main { display:flex; gap:6px; align-items:center; }
 .join-type { width:115px; flex-shrink:0; }
 .join-alias-input { width:64px !important; flex-shrink:0; }
 .join-cols-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.join-sub-lbl { font-size:.75rem; color:var(--text); margin-bottom:3px; font-weight:600; }
+.join-sub-lbl { font-size:.68rem; color:var(--text); margin-bottom:3px; font-weight:600; }
 .btn-remove { background:transparent; border:1px solid rgba(244,112,103,.3); color:var(--red); border-radius:4px; cursor:pointer; padding:3px 7px; font-size:.8rem; flex-shrink:0; transition:all .13s; }
 .btn-remove:hover { background:rgba(244,112,103,.15); }
 /* ON BUILDER */
@@ -185,7 +185,8 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:3px; }
 
-/* THEME TOGGLE */
+.section-label { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+.section-box { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:11px 12px; display:flex; flex-direction:column; gap:8px; }
 
 @media (max-width:700px) {
   .layout { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
@@ -210,11 +211,13 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
     <div class="panel-title">입력</div>
     <div class="panel-body">
 
-      <!-- 도메인: 맨위 한줄 -->
-      <div class="namespace-bar" style="flex-direction:column;align-items:flex-start;gap:5px">
-        <div style="display:flex;align-items:center;gap:8px;width:100%">
-          <label>도메인</label>
-          <input type="text" id="inp-domain" oninput="onInputChange()" />
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="section-label">모듈명</span>
+        <div class="section-box">
+          <div class="field">
+            <label>Module Name</label>
+            <input type="text" id="inp-domain" oninput="onInputChange()" />
+          </div>
         </div>
       </div>
 
@@ -236,13 +239,13 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
           <div class="field">
             <label>컬럼 목록 (줄 구분)</label>
             <textarea id="columns" rows="9"
-             
+              placeholder=""
               oninput="onInputChange()" style="height:192px"></textarea>
           </div>
           <div class="field">
             <label>주석 (컬럼 순서 일치, 줄 구분)</label>
             <textarea id="comments" rows="9"
-             
+              placeholder=""
               oninput="onInputChange()" style="height:192px"></textarea>
           </div>
         </div>
@@ -267,6 +270,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
             <label style="white-space:nowrap;flex-shrink:0;">= 조건 컬럼</label>
             <div class="cond-combo on-combo">
               <input class="on-combo-input" id="eq-combo" type="text" data-cond-type="eq" autocomplete="off"
+                placeholder="컬럼 선택"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -279,6 +283,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
             <label style="white-space:nowrap;flex-shrink:0;">IN 조건 컬럼</label>
             <div class="cond-combo on-combo">
               <input class="on-combo-input" id="in-combo" type="text" data-cond-type="in" autocomplete="off"
+                placeholder="컬럼 선택"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -291,6 +296,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
             <label style="white-space:nowrap;flex-shrink:0;">LIKE 조건 컬럼</label>
             <div class="cond-combo on-combo">
               <input class="on-combo-input" id="like-combo" type="text" data-cond-type="like" autocomplete="off"
+                placeholder="컬럼 선택"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -303,6 +309,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
             <label style="white-space:nowrap;flex-shrink:0;">날짜 범위 컬럼</label>
             <div class="cond-combo on-combo">
               <input class="on-combo-input" id="date-combo" type="text" data-cond-type="date" autocomplete="off"
+                placeholder="컬럼 선택"
                 oninput="filterCondCombo(this)" onfocus="openCondCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -321,6 +328,7 @@ textarea { resize:vertical; font-family:'Consolas','Fira Code',monospace; font-s
             <label style="white-space:nowrap;flex-shrink:0;">PK 컬럼 선택</label>
             <div class="cond-combo on-combo">
               <input class="on-combo-input" id="pk-combo" type="text" autocomplete="off"
+                placeholder="컬럼 선택"
                 oninput="filterPkCombo(this)" onfocus="openPkCombo(this)" onblur="closeOnComboDelay(this)">
               <div class="on-combo-drop"></div>
             </div>
@@ -574,12 +582,14 @@ function addJoin() {
       <div class="on-builder-row">
         <div class="on-combo">
           <input class="on-left-sel on-combo-input" type="text" autocomplete="off"
+            placeholder="컬럼 선택"
             oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
           <div class="on-combo-drop"></div>
         </div>
         <span class="on-eq">=</span>
         <div class="on-combo">
           <input class="on-right-sel on-combo-input" type="text" autocomplete="off"
+            placeholder="컬럼 선택"
             oninput="filterOnCombo(this)" onfocus="openOnCombo(this)" onblur="closeOnComboDelay(this)">
           <div class="on-combo-drop"></div>
         </div>
